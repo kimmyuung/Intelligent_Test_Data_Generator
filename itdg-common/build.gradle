@@ -1,22 +1,27 @@
-plugins {
-    id 'java-library'
-}
+description = 'ITDG Common Module - 공통 DTO, Exception, Util'
 
 dependencies {
+    // JPA
+    api 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // Validation
     api 'org.springframework.boot:spring-boot-starter-validation'
+
+    // Web
     api 'org.springframework.boot:spring-boot-starter-web'
 
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-
-    // JSON 처리
+    // JSON
     api 'com.fasterxml.jackson.core:jackson-databind'
     api 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
-    // Swagger for API documentation (Spring Boot 3.x/4.x 호환)
+    // Swagger/OpenAPI
     api 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
 
-    // 테스트 의존성 추가
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.assertj:assertj-core:3.24.2'
+    // Lombok (버전은 root build.gradle에서 관리됨)
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // 테스트에서 DTO를 사용한다면 테스트 의존성도 확인
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
 }

@@ -16,7 +16,6 @@ out/
 .classpath
 .project
 .settings/
-bin/
 
 # VS Code
 .vscode/
@@ -33,24 +32,6 @@ application-secret.yml
 logs/
 *.log
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-.Python
-venv/
-env/
-*.egg-info/
-
-# Docker
-.docker/
-
 # Database
 *.db
 *.sqlite
-
-# ML Models
-*.h5
-*.pkl
-*.pth
-models/saved/
