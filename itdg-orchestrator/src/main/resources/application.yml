@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: itdg-orchestrator
+  profiles:
+    active: local
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: jdbc:postgresql://localhost:5432/itdg
+    username: itdg
+    password: itdg123
+  redis:
+    host: localhost
+    port: 6379
+
+server:
+  port: 8081
+
+ml-server:
+  url: http://localhost:8000
