@@ -1,0 +1,9 @@
+description = 'ITDG Domain Module - 공통 도메인 엔티티'
+
+dependencies {
+    // JPA
+    api 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // Validation
+    api 'org.springframework.boot:spring-boot-starter-validation'
+}

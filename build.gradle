@@ -1,61 +1,107 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '4.0.0' apply false
-    id 'io.spring.dependency-management' version '1.1.7' apply false
+    id 'org.springframework.boot' version '4.0.0'
+    id 'io.spring.dependency-management' version '1.1.7'
 }
 
+// 버전 관리
 ext {
     springCloudVersion = '2025.1.0'
-    lombokVersion = '1.18.32'  // 버전 명시
+    lombokVersion = '1.18.32'
 }
 
+// 모든 프로젝트 공통 설정 (group, version, repository 등 기본 설정)
+allprojects {
+    group = 'com.itdg'
+    version = '1.0.0-SNAPSHOT'
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+// =======================================================
+// 💡 서브 프로젝트 공통 설정 (플러그인, Java 버전, BOM 관리)
+// 모든 서브 프로젝트에 적용되는 설정입니다.
+// =======================================================
 subprojects {
+    // 1. 공통 플러그인 적용 (dependencies 블록 이전에)
     apply plugin: 'java'
-    apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
 
+    // Java 21 설정
     java {
         toolchain {
             languageVersion = JavaLanguageVersion.of(21)
         }
     }
 
-    configurations {
-        compileOnly {
-            extendsFrom annotationProcessor
-        }
+    // 컴파일 옵션
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+        options.compilerArgs += ['-parameters']
     }
 
+    // 테스트 설정
+    tasks.named('test') {
+        useJUnitPlatform()
+        testLogging {
+            events "passed", "skipped", "failed"
+            exceptionFormat "full"
+        }
+
+        // 💡 1. JVM 메모리 설정 (자원 부족으로 인한 비정상 종료 방지)
+        maxHeapSize = "1024m" // 1GB 할당
+        jvmArgs = ['-Dfile.encoding=UTF-8']
+
+        // 💡 2. 병렬 실행 비활성화 (I/O 및 프로세스 간 충돌 방지)
+        maxParallelForks = 1
+    }
+
+    // 의존성 관리 (BOM, 의존성 버전 명시)
     dependencyManagement {
         imports {
+            // Spring Boot BOM (버전은 root plugins 블록과 일치)
+            mavenBom "org.springframework.boot:spring-boot-dependencies:4.0.0"
+            // Spring Cloud BOM
             mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
         }
         dependencies {
-            // Lombok 버전 통일
             dependency "org.projectlombok:lombok:${lombokVersion}"
         }
     }
 
+    // 공통 의존성 (여기에 두어도 'java' 플러그인이 적용되었으므로 문제 없음)
     dependencies {
-        //  Lombok - 컴파일과 어노테이션 프로세싱 모두 필요
+        // Lombok
         compileOnly 'org.projectlombok:lombok'
         annotationProcessor 'org.projectlombok:lombok'
 
-        // 테스트 의존성
+        // 테스트 공통 의존성
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-        //  테스트에서도 Lombok 사용
         testCompileOnly 'org.projectlombok:lombok'
         testAnnotationProcessor 'org.projectlombok:lombok'
     }
+}
+// =======================================================
 
-    tasks.named('test') {
-        useJUnitPlatform()
+
+// 라이브러리 모듈 설정 (실행 불가, java-library 플러그인 적용)
+configure(subprojects.findAll { it.name in ['itdg-domain', 'itdg-common'] }) {
+    apply plugin: 'java-library' // java 플러그인을 java-library로 덮어씁니다.
+
+    jar {
+        enabled = true
     }
 }
 
-project(':itdg-common') {
-    bootJar { enabled = false }
-    jar { enabled = true }
+
+// 애플리케이션 모듈 설정 (실행 가능, Spring Boot 플러그인 적용)
+configure(subprojects.findAll { it.name in ['itdg-orchestrator', 'itdg-analyzer', 'itdg-generator'] }) {
+    apply plugin: 'org.springframework.boot' // org.springframework.boot 플러그인 적용
+
+    jar {
+        enabled = false
+    }
 }

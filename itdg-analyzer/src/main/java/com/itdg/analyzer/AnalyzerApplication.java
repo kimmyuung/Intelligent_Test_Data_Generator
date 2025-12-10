@@ -3,11 +3,12 @@ package com.itdg.analyzer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {
+        "com.itdg.analyzer",
+        "com.itdg.common"
+})
 public class AnalyzerApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(AnalyzerApplication.class, args);
     }
-
 }

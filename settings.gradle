@@ -1,7 +1,9 @@
 // settings.gradle 내용 (수동 수정 필요)
-rootProject.name = 'Intelligent_Test_Data_Generator'
+rootProject.name = 'intelligent-test-data-generator'
+
+// 모듈 선언
+include 'itdg-domain'
 include 'itdg-common'
-include 'itdg-api-gateway'
 include 'itdg-orchestrator'
 include 'itdg-analyzer'
 include 'itdg-generator'
