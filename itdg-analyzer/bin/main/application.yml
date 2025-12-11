@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: itdg-analyzer
+  profiles:
+    active: local
+
+server:
+  port: 8082
+
+logging:
+  level:
+    com.itdg: DEBUG

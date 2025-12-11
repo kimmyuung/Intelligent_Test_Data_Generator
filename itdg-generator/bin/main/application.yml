@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: itdg-generator
+  profiles:
+    active: local
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: false
+
+server:
+  port: 8083
+
+logging:
+  level:
+    com.itdg: DEBUG
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: jdbc:postgresql://localhost:5432/itdg
+    username: itdg
+    password: itdg123
+    driver-class-name: org.postgresql.Driver
