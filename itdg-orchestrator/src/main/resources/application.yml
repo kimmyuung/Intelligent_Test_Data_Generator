@@ -3,6 +3,9 @@ spring:
     name: itdg-orchestrator
   profiles:
     active: local
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
   jpa:
     hibernate:
       ddl-auto: update
@@ -10,7 +13,9 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+  h2:
+    console:
+      enabled: true
 
 server:
   port: 8081
@@ -26,13 +31,10 @@ spring:
     activate:
       on-profile: local
   datasource:
-    url: jdbc:postgresql://localhost:5432/itdg
-    username: itdg
-    password: itdg123
-    driver-class-name: org.postgresql.Driver
-  redis:
-    host: localhost
-    port: 6379
+    url: jdbc:h2:mem:itdg
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
 
 analyzer:
   service:

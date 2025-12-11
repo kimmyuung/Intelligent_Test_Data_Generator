@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '4.0.0'
+    id 'org.springframework.boot' version '4.0.0' apply false
     id 'io.spring.dependency-management' version '1.1.7'
 }
 
@@ -100,6 +100,10 @@ configure(subprojects.findAll { it.name in ['itdg-domain', 'itdg-common'] }) {
 // 애플리케이션 모듈 설정 (실행 가능, Spring Boot 플러그인 적용)
 configure(subprojects.findAll { it.name in ['itdg-orchestrator', 'itdg-analyzer', 'itdg-generator'] }) {
     apply plugin: 'org.springframework.boot' // org.springframework.boot 플러그인 적용
+
+    bootJar {
+        enabled = true
+    }
 
     jar {
         enabled = false

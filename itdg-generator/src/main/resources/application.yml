@@ -26,6 +26,7 @@ spring:
     activate:
       on-profile: local
   datasource:
-    url: jdbc:postgresql://localhost:5432/itdg
-    username: itdg
-    password: itdg123
+    url: jdbc:h2:mem:itdg
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
