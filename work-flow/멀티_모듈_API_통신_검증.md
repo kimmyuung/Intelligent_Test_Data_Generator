@@ -2,7 +2,7 @@
 
 ## 개요
 
-멀티 모듈 프로젝트의 구조를 분석하고 모듈 간 API 통신을 검증했습니다. 모든 서비스가 정상적으로 실행되고 통신이 원활하게 이루어지는 것을 확인했습니다.
+멀티 모듈 프로젝트의 구조를 분석하고 모듈 간 API 통신을 검증했습니다. PostgreSQL 환경에서 모든 서비스가 정상적으로 실행되고 통신이 원활하게 이루어지는 것을 확인했습니다.
 
 ---
 
@@ -20,11 +20,14 @@
         - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
   ```
 
-#### 데이터베이스 설정 변경
-- **문제**: PostgreSQL이 로컬에서 실행되지 않을 가능성
-- **해결**: H2 인메모리 데이터베이스로 변경
-  - Orchestrator: `jdbc:h2:mem:itdg`
-  - Generator: `jdbc:h2:mem:itdg`
+#### 데이터베이스 설정
+- **데이터베이스**: PostgreSQL
+- **연결 정보**:
+  - Host: localhost
+  - Port: 5432
+  - Database: itdg
+  - Username: itdg
+  - Password: itdg123
 
 #### 빌드 설정 수정
 - **문제**: 루트 프로젝트에서 Spring Boot 플러그인 적용으로 인한 빌드 오류
@@ -113,6 +116,7 @@ Orchestrator에서 Analyzer와 Generator 서비스를 호출하는 기능을 구
 2. **[ServiceCommunicationService.java](file:///c:/Users/김명호/IdeaProjects/Intelligent_Test_Data_Generator/itdg-orchestrator/src/main/java/com/itdg/orchestrator/service/ServiceCommunicationService.java)**
    - 각 서비스의 헬스체크를 호출하는 비즈니스 로직
    - 모든 서비스의 상태를 동시에 확인하는 기능
+   - `ParameterizedTypeReference`를 사용하여 제네릭 타입 안정성 확보
 
 3. **[ServiceTestController.java](file:///c:/Users/김명호/IdeaProjects/Intelligent_Test_Data_Generator/itdg-orchestrator/src/main/java/com/itdg/orchestrator/controller/ServiceTestController.java)**
    - 모듈 간 통신을 테스트하는 REST API 엔드포인트
@@ -196,7 +200,7 @@ curl http://localhost:8081/api/test/all
 
 1. **빌드 환경 구성**
    - Redis 미실행 환경에서도 정상 작동하도록 설정
-   - H2 인메모리 데이터베이스로 외부 DB 의존성 제거
+   - PostgreSQL 데이터베이스 연결 성공
    - 모든 모듈 빌드 성공
 
 2. **서비스 실행**
@@ -231,47 +235,71 @@ curl http://localhost:8081/api/test/all
 | Analyzer | 8082 | DB 스키마 분석 |
 | Generator | 8083 | 데이터 생성 및 배치 처리 |
 
+### 데이터베이스 설정
+| 모듈 | 데이터베이스 | 용도 |
+|------|-------------|------|
+| Orchestrator | PostgreSQL (itdg) | 워크플로우 메타데이터 저장 |
+| Generator | PostgreSQL (itdg) | 배치 작업 메타데이터 및 생성 데이터 저장 |
+| Analyzer | JDBC 연결 | 대상 DB 스키마 분석 (동적 연결) |
+
 ---
 
 ## 다음 단계 제안
 
 ### 1. 비즈니스 로직 구현
 현재는 헬스체크만 구현되어 있으므로, 실제 비즈니스 기능을 추가해야 합니다:
-- Analyzer: DB 스키마 분석 API
-- Generator: 데이터 생성 및 배치 작업 API
-- Orchestrator: 전체 워크플로우 조정 API
+- **Analyzer**: DB 스키마 분석 API
+  - 테이블 구조 분석
+  - 컬럼 타입 및 제약조건 추출
+  - 외래키 관계 파악
+- **Generator**: 데이터 생성 및 배치 작업 API
+  - AI 기반 데이터 생성
+  - Spring Batch를 통한 대량 데이터 삽입
+  - CSV/XLSX 파일 출력
+- **Orchestrator**: 전체 워크플로우 조정 API
+  - Analyzer 호출 → Generator 호출 → 결과 반환
 
 ### 2. 에러 처리 강화
 - 서비스 다운 시 재시도 로직
 - Circuit Breaker 패턴 적용 (Resilience4j)
 - 타임아웃 설정
+- 상세한 에러 메시지 및 로깅
 
 ### 3. 모니터링 및 로깅
 - Spring Boot Actuator 활용
 - 분산 추적 (Sleuth, Zipkin)
-- 중앙 집중식 로깅
+- 중앙 집중식 로깅 (ELK Stack)
+- 메트릭 수집 (Prometheus + Grafana)
 
 ### 4. 테스트 코드 작성
 - 단위 테스트
 - 통합 테스트
 - WebClient 통신 테스트
+- Spring Batch 테스트
 
 ### 5. Docker 및 Kubernetes 배포
 - 각 서비스의 Dockerfile 작성
 - Kubernetes Deployment 및 Service 설정
 - Ingress 설정
+- ConfigMap 및 Secret 관리
+
+### 6. 보안 강화
+- API 인증/인가 (JWT, OAuth2)
+- DB 연결 정보 암호화
+- HTTPS 적용
 
 ---
 
 ## 결론
 
-멀티 모듈 프로젝트의 기본 구조와 모듈 간 통신이 정상적으로 작동하는 것을 확인했습니다. 
+멀티 모듈 프로젝트의 기본 구조와 모듈 간 통신이 PostgreSQL 환경에서 정상적으로 작동하는 것을 확인했습니다.
 
 **주요 성과:**
 - ✅ 3개 서비스 모두 정상 실행
+- ✅ PostgreSQL 데이터베이스 연결 성공
 - ✅ 헬스체크 API 정상 작동
 - ✅ Orchestrator에서 다른 서비스 호출 성공
 - ✅ WebClient를 사용한 비동기 통신 구현
-- ✅ 외부 의존성(Redis, PostgreSQL) 없이 실행 가능한 환경 구성
+- ✅ Redis 의존성 없이 실행 가능한 환경 구성
 
 이제 실제 비즈니스 로직을 구현할 준비가 완료되었습니다!

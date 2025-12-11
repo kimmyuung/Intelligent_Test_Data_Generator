@@ -1,0 +1,14 @@
+spring:
+  config:
+    activate:
+      on-profile: docker
+  datasource:
+    url: jdbc:postgresql://postgres:5432/itdg
+    username: itdg
+    password: itdg123
+  redis:
+    host: redis
+    port: 6379
+
+ml-server:
+  url: http://ml-server:8000
