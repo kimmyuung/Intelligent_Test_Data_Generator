@@ -7,6 +7,10 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   batch:
     jdbc:
       initialize-schema: always
@@ -26,7 +30,7 @@ spring:
     activate:
       on-profile: local
   datasource:
-    url: jdbc:h2:mem:itdg
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
+    url: jdbc:postgresql://localhost:5432/itdg
+    username: itdg
+    password: itdg123
+    driver-class-name: org.postgresql.Driver
