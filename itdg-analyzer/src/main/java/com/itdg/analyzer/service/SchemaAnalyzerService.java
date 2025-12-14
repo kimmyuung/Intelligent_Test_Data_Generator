@@ -1,6 +1,6 @@
 package com.itdg.analyzer.service;
 
-import com.itdg.analyzer.dto.request.DbConnectionRequest;
+import com.itdg.common.dto.request.DbConnectionRequest;
 import com.itdg.common.dto.metadata.SchemaMetadata;
 import com.itdg.common.dto.metadata.TableMetadata;
 import com.itdg.common.dto.response.ApiResponse;

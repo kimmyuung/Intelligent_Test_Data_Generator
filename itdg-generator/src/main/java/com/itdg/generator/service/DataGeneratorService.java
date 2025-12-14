@@ -1,0 +1,152 @@
+package com.itdg.generator.service;
+
+import com.itdg.common.dto.metadata.ColumnMetadata;
+import com.itdg.common.dto.metadata.TableMetadata;
+import com.itdg.common.dto.request.GenerateDataRequest;
+import com.itdg.common.dto.response.GenerateDataResponse;
+import com.itdg.generator.constraint.UniqueValueTracker;
+import com.itdg.generator.strategy.DataGeneratorStrategy;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class DataGeneratorService {
+
+    private final List<DataGeneratorStrategy> strategies;
+
+    public GenerateDataResponse generateData(GenerateDataRequest request) {
+        log.info("Starting data generation for request with seed: {}", request.getSeed());
+
+        long seed = request.getSeed() != null ? request.getSeed() : System.currentTimeMillis();
+        Random random = new Random(seed);
+
+        Map<String, List<Map<String, Object>>> successData = new HashMap<>();
+        Map<String, Integer> statistics = new HashMap<>();
+
+        // request.getSchema() null check
+        if (request.getSchema() == null || request.getSchema().getTables() == null) {
+            throw new IllegalArgumentException("Schema information is missing");
+        }
+
+        for (TableMetadata table : request.getSchema().getTables()) {
+            log.info("Generating data for table: {}", table.getTableName());
+            UniqueValueTracker uniqueTracker = new UniqueValueTracker();
+            AtomicLong pkSequence = new AtomicLong(1); // Simple sequence for PKs
+
+            int rowCount = request.getRowCount() != null ? request.getRowCount() : 10;
+            List<Map<String, Object>> rows = new ArrayList<>();
+
+            for (int i = 0; i < rowCount; i++) {
+                Map<String, Object> row = generateRow(table, random, uniqueTracker, pkSequence);
+                if (row != null) {
+                    rows.add(row);
+                }
+            }
+
+            successData.put(table.getTableName(), rows);
+            statistics.put(table.getTableName(), rows.size());
+        }
+
+        return GenerateDataResponse.builder()
+                .generatedData(successData)
+                .statistics(statistics)
+                .generatedAt(LocalDateTime.now())
+                .seed(seed)
+                .success(true)
+                .message("Successfully generated data for " + successData.size() + " tables")
+                .build();
+    }
+
+    private Map<String, Object> generateRow(TableMetadata table, Random random, UniqueValueTracker uniqueTracker,
+            AtomicLong pkSequence) {
+        Map<String, Object> row = new HashMap<>();
+        int maxRetries = 5;
+
+        for (ColumnMetadata column : table.getColumns()) {
+            Object value = null;
+            boolean valid = false;
+
+            // 1. Primary Key Handling
+            if (column.isPrimaryKey()) {
+                value = generatePrimaryKey(column, pkSequence);
+                valid = true; // PK is handled separately
+            } else {
+                // 2. Normal Column Generation with Retry for Unique Constraints
+                for (int attempt = 0; attempt < maxRetries; attempt++) {
+                    value = generateColumnValue(column, random);
+
+                    // Not Null Check
+                    if (!column.isNullable() && value == null) {
+                        continue; // Try again
+                    }
+
+                    // Unique Check - For now, we don't have isUnique metadata in basic
+                    // ColumnMetadata...
+                    // Assuming we might have it or treat PK/Unique index in future.
+                    // For now, let's treat every generated value as valid unless explicitly unique
+                    // (not in current metadata dto?)
+                    // Wait, ColumnMetadata DOES NOT have isUnique explicitly in the current view...
+                    // But if it were unique, we'd check uniqueTracker.isUnique(column.getName(),
+                    // value)
+
+                    valid = true;
+                    break;
+                }
+            }
+
+            if (!valid && !column.isNullable()) {
+                log.warn("Failed to generate valid value for NOT NULL column: {}.{}", table.getTableName(),
+                        column.getName());
+                // Should we abort row? Or insert default?
+                // For now, keep as null or basic default?
+                value = getDefaultValue(column); // Fallback
+            }
+
+            row.put(column.getName(), value);
+        }
+        return row;
+    }
+
+    // Fallback for failed generation
+    private Object getDefaultValue(ColumnMetadata column) {
+        String type = column.getDataType().toUpperCase();
+        if (type.contains("INT") || type.contains("NUMBER"))
+            return 0;
+        if (type.contains("STR") || type.contains("CHAR"))
+            return "DEFAULT";
+        if (type.contains("DATE"))
+            return "2024-01-01";
+        return "fallback";
+    }
+
+    private Object generatePrimaryKey(ColumnMetadata column, AtomicLong pkSequence) {
+        String type = column.getDataType().toUpperCase();
+        if (column.isAutoIncrement() || type.contains("INT") || type.contains("SERIAL")) {
+            return pkSequence.getAndIncrement();
+        }
+        return UUID.randomUUID().toString();
+    }
+
+    private Object generateColumnValue(ColumnMetadata column, Random random) {
+        // Strategy Pattern Application
+        for (DataGeneratorStrategy strategy : strategies) {
+            if (strategy.supports(column)) {
+                return strategy.generate(column, random);
+            }
+        }
+        // Fallback if no strategy supports
+        return "N/A";
+    }
+}
