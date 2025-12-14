@@ -16,6 +16,7 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/api/orchestrator")
 @RequiredArgsConstructor
+@org.springframework.web.bind.annotation.CrossOrigin(origins = "*")
 public class OrchestratorController {
 
     private final OrchestrationService orchestrationService;
@@ -28,6 +29,18 @@ public class OrchestratorController {
                 .onErrorResume(error -> {
                     log.error("Orchestration request failed", error);
                     return Mono.just(ApiResponse.error("Orchestration failed: " + error.getMessage()));
+                });
+    }
+
+    @PostMapping("/process-metadata")
+    public Mono<ApiResponse<GenerateDataResponse>> processMetadataRequest(
+            @RequestBody com.itdg.common.dto.request.SchemaBasedOrchestrationRequest request) {
+        log.info("Received schema-based orchestration request");
+        return orchestrationService.processSchemaDataGeneration(request)
+                .map(ApiResponse::success)
+                .onErrorResume(error -> {
+                    log.error("Schema orchestration request failed", error);
+                    return Mono.just(ApiResponse.error("Generation failed: " + error.getMessage()));
                 });
     }
 }

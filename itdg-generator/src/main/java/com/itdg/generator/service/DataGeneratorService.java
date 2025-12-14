@@ -79,7 +79,7 @@ public class DataGeneratorService {
             boolean valid = false;
 
             // 1. Primary Key Handling
-            if (column.isPrimaryKey()) {
+            if (Boolean.TRUE.equals(column.getIsPrimaryKey())) {
                 value = generatePrimaryKey(column, pkSequence);
                 valid = true; // PK is handled separately
             } else {
@@ -88,29 +88,18 @@ public class DataGeneratorService {
                     value = generateColumnValue(column, random);
 
                     // Not Null Check
-                    if (!column.isNullable() && value == null) {
+                    if (!Boolean.TRUE.equals(column.getIsNullable()) && value == null) {
                         continue; // Try again
                     }
-
-                    // Unique Check - For now, we don't have isUnique metadata in basic
-                    // ColumnMetadata...
-                    // Assuming we might have it or treat PK/Unique index in future.
-                    // For now, let's treat every generated value as valid unless explicitly unique
-                    // (not in current metadata dto?)
-                    // Wait, ColumnMetadata DOES NOT have isUnique explicitly in the current view...
-                    // But if it were unique, we'd check uniqueTracker.isUnique(column.getName(),
-                    // value)
 
                     valid = true;
                     break;
                 }
             }
 
-            if (!valid && !column.isNullable()) {
+            if (!valid && !Boolean.TRUE.equals(column.getIsNullable())) {
                 log.warn("Failed to generate valid value for NOT NULL column: {}.{}", table.getTableName(),
                         column.getName());
-                // Should we abort row? Or insert default?
-                // For now, keep as null or basic default?
                 value = getDefaultValue(column); // Fallback
             }
 
@@ -133,7 +122,7 @@ public class DataGeneratorService {
 
     private Object generatePrimaryKey(ColumnMetadata column, AtomicLong pkSequence) {
         String type = column.getDataType().toUpperCase();
-        if (column.isAutoIncrement() || type.contains("INT") || type.contains("SERIAL")) {
+        if (Boolean.TRUE.equals(column.getIsAutoIncrement()) || type.contains("INT") || type.contains("SERIAL")) {
             return pkSequence.getAndIncrement();
         }
         return UUID.randomUUID().toString();

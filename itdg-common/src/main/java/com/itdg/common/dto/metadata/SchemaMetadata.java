@@ -23,4 +23,7 @@ public class SchemaMetadata {
 
     @Builder.Default
     private LocalDateTime analyzedAt = LocalDateTime.now();
+
+    // 프로젝트 분석 시 메타 정보
+    private ProjectInfo projectInfo;
 }

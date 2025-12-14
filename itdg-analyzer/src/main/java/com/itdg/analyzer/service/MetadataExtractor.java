@@ -46,8 +46,8 @@ public class MetadataExtractor {
                                     .name(col.getName())
                                     .dataType(col.getDataType())
                                     .length(col.getLength())
-                                    .isNullable(col.isNullable())
-                                    .isAutoIncrement(col.isAutoIncrement())
+                                    .isNullable(col.getIsNullable())
+                                    .isAutoIncrement(col.getIsAutoIncrement())
                                     .isPrimaryKey(isPk)
                                     .comment(col.getComment())
                                     .build();

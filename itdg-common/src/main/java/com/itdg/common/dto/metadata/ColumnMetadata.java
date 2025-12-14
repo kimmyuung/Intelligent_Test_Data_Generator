@@ -4,9 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 @Getter
+@Setter
 @Builder
 @ToString
 @NoArgsConstructor
@@ -15,8 +17,8 @@ public class ColumnMetadata {
     private String name;
     private String dataType;
     private Integer length;
-    private boolean isPrimaryKey;
-    private boolean isNullable;
-    private boolean isAutoIncrement;
+    private Boolean isPrimaryKey;
+    private Boolean isNullable;
+    private Boolean isAutoIncrement;
     private String comment;
 }

@@ -1,0 +1,160 @@
+.schema-review-container {
+    padding: 10px;
+}
+
+.project-badge {
+    display: flex;
+    align-items: center;
+    background: #333;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    border-left: 5px solid #888;
+}
+
+.project-badge.java {
+    border-left-color: #f89820;
+    background: rgba(248, 152, 32, 0.1);
+}
+
+.project-badge.sql {
+    border-left-color: #00758f;
+    background: rgba(0, 117, 143, 0.1);
+}
+
+.lang-icon {
+    font-size: 2rem;
+    margin-right: 15px;
+}
+
+.badge-info {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.badge-info strong {
+    font-size: 1.1rem;
+    color: white;
+}
+
+.badge-info span {
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+.badge-info .file-count {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.table-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.table-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.2s;
+}
+
+.table-card.selected {
+    border-color: #646cff;
+    box-shadow: 0 4px 12px rgba(100, 108, 255, 0.15);
+}
+
+.card-header {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.table-name {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.pk-badge {
+    background: #e63946;
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.card-body {
+    padding: 15px;
+}
+
+.column-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 15px 0;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.column-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 0.9rem;
+}
+
+.col-type {
+    color: #888;
+    font-family: monospace;
+}
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-footer input {
+    width: 60px;
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #555;
+    background: #222;
+    color: white;
+    text-align: center;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.back-btn {
+    padding: 12px 25px;
+    background: transparent;
+    border: 1px solid #666;
+    color: #ccc;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
