@@ -1,4 +1,4 @@
-package com.itdg.analyzer.dto.request;
+package com.itdg.common.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

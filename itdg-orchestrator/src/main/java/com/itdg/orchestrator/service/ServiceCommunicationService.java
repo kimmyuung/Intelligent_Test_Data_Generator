@@ -1,6 +1,10 @@
 package com.itdg.orchestrator.service;
 
+import com.itdg.common.dto.metadata.SchemaMetadata;
+import com.itdg.common.dto.request.DbConnectionRequest;
+import com.itdg.common.dto.request.GenerateDataRequest;
 import com.itdg.common.dto.response.ApiResponse;
+import com.itdg.common.dto.response.GenerateDataResponse;
 import com.itdg.common.dto.response.HealthCheckResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +54,41 @@ public class ServiceCommunicationService {
                 })
                 .doOnSuccess(response -> log.info("Generator health check successful: {}", response))
                 .doOnError(error -> log.error("Generator health check failed", error));
+    }
+
+    /**
+     * Analyzer 서비스에 DB 스키마 추출 요청
+     */
+    public Mono<ApiResponse<SchemaMetadata>> extractSchema(DbConnectionRequest request) {
+        log.info("Calling Analyzer extract schema");
+        return analyzerWebClient.post()
+                .uri("/api/analyze")
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<ApiResponse<SchemaMetadata>>() {
+                })
+                .doOnSuccess(response -> log.info("Schema extraction successful"))
+                .doOnError(error -> log.error("Schema extraction failed", error));
+    }
+
+    /**
+     * Generator 서비스에 데이터 생성 요청
+     */
+    public Mono<GenerateDataResponse> generateData(GenerateDataRequest request) {
+        log.info("Calling Generator generate data");
+        // Generator Controller returns ResponseEntity<GenerateDataResponse> directly,
+        // NOT ApiResponse wrapper based on prev implementation
+        // But let's check current GeneratorController implementation...
+        // GeneratorController: return ResponseEntity.ok(response); where response is
+        // GenerateDataResponse.
+
+        return generatorWebClient.post()
+                .uri("/api/generator/generate")
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(GenerateDataResponse.class)
+                .doOnSuccess(response -> log.info("Data generation request successful"))
+                .doOnError(error -> log.error("Data generation request failed", error));
     }
 
     /**

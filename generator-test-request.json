@@ -1,0 +1,77 @@
+{
+    "schema": {
+        "tables": [
+            {
+                "tableName": "users",
+                "columns": [
+                    {
+                        "name": "id",
+                        "dataType": "INTEGER",
+                        "isPrimaryKey": true,
+                        "isAutoIncrement": true,
+                        "isNullable": false,
+                        "length": 0
+                    },
+                    {
+                        "name": "username",
+                        "dataType": "VARCHAR",
+                        "length": 50,
+                        "isPrimaryKey": false,
+                        "isAutoIncrement": false,
+                        "isNullable": false
+                    },
+                    {
+                        "name": "email",
+                        "dataType": "VARCHAR",
+                        "length": 100,
+                        "isPrimaryKey": false,
+                        "isAutoIncrement": false,
+                        "isNullable": false
+                    },
+                    {
+                        "name": "phone_number",
+                        "dataType": "VARCHAR",
+                        "length": 20,
+                        "isPrimaryKey": false,
+                        "isAutoIncrement": false,
+                        "isNullable": true
+                    },
+                    {
+                        "name": "address",
+                        "dataType": "VARCHAR",
+                        "length": 200,
+                        "isPrimaryKey": false,
+                        "isAutoIncrement": false,
+                        "isNullable": true
+                    },
+                    {
+                        "name": "age",
+                        "dataType": "INTEGER",
+                        "length": 0,
+                        "isPrimaryKey": false,
+                        "isAutoIncrement": false,
+                        "isNullable": true
+                    },
+                    {
+                        "name": "created_at",
+                        "dataType": "TIMESTAMP",
+                        "length": 0,
+                        "isPrimaryKey": false,
+                        "isAutoIncrement": false,
+                        "isNullable": true
+                    },
+                    {
+                        "name": "is_active",
+                        "dataType": "BOOLEAN",
+                        "length": 0,
+                        "isPrimaryKey": false,
+                        "isAutoIncrement": false,
+                        "isNullable": false
+                    }
+                ]
+            }
+        ]
+    },
+    "rowCount": 3,
+    "seed": 12345
+}
