@@ -1,0 +1,6 @@
+{
+    "url": "jdbc:postgresql://localhost:5432/itdg",
+    "username": "itdg",
+    "password": "itdg123",
+    "driverClassName": "org.postgresql.Driver"
+}

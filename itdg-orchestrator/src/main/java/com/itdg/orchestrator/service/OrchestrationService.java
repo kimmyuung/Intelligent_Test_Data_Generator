@@ -44,4 +44,24 @@ public class OrchestrationService {
                 .doOnSuccess(response -> log.info("Orchestration completed successfully"))
                 .doOnError(error -> log.error("Orchestration failed", error));
     }
+
+    public Mono<GenerateDataResponse> processSchemaDataGeneration(
+            com.itdg.common.dto.request.SchemaBasedOrchestrationRequest request) {
+        log.info("Starting schema-based generation");
+
+        SchemaMetadata schemaMetadata = SchemaMetadata.builder()
+                .databaseName("Project Source")
+                .tables(request.getTables())
+                .analyzedAt(java.time.LocalDateTime.now())
+                .build();
+
+        GenerateDataRequest generateRequest = GenerateDataRequest.builder()
+                .schema(schemaMetadata)
+                .rowCount(5) // Default fallback, individual table row counts should be respected by
+                             // Generator
+                .seed(request.getSeed() != null ? request.getSeed() : System.currentTimeMillis())
+                .build();
+
+        return communicationService.generateData(generateRequest);
+    }
 }

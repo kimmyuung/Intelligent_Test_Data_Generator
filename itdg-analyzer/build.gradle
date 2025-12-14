@@ -18,4 +18,13 @@ dependencies {
 
     // Actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // Static Analysis & Git
+    implementation 'com.github.javaparser:javaparser-core:3.25.7'
+    implementation 'com.github.javaparser:javaparser-symbol-solver-core:3.25.7'
+    implementation 'com.github.jsqlparser:jsqlparser:4.6'
+    implementation 'org.eclipse.jgit:org.eclipse.jgit:6.8.0.202311291450-r'
+
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
