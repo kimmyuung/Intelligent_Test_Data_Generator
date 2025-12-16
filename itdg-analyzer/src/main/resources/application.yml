@@ -6,6 +6,11 @@ spring:
 
 server:
   port: 8082
+  servlet:
+    session:
+      timeout: 30m
+      cookie:
+        max-age: 1800
 
 logging:
   level:

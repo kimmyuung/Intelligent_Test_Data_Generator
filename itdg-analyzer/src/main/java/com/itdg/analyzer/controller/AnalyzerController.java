@@ -24,14 +24,31 @@ public class AnalyzerController {
     private final com.itdg.analyzer.service.SourceHelperService sourceHelperService;
     private final com.itdg.analyzer.service.ProjectAnalysisService projectAnalysisService;
 
-    /*
-     * @PostMapping
-     * public ApiResponse<SchemaMetadata> analyzeSchema(@RequestBody
-     * DbConnectionRequest request) {
-     * log.info("Received analysis request for URL: {}", request.getUrl());
-     * return schemaAnalyzerService.analyze(request);
-     * }
-     */
+    private final com.itdg.analyzer.service.EncryptionService encryptionService;
+
+    @org.springframework.web.bind.annotation.GetMapping("/public-key")
+    public ApiResponse<String> getPublicKey() {
+        return ApiResponse.success(encryptionService.getPublicKey());
+    }
+
+    @PostMapping
+    public ApiResponse<SchemaMetadata> analyzeSchema(
+            @RequestBody @jakarta.validation.Valid DbConnectionRequest request) {
+        log.info("Received analysis request for URL: {}", request.getUrl());
+
+        // Decrypt password
+        String decryptedPassword = encryptionService.decrypt(request.getPassword());
+
+        // Create new request object with decrypted password (or modify if setter
+        // exists)
+        DbConnectionRequest decryptedRequest = new DbConnectionRequest();
+        decryptedRequest.setUrl(request.getUrl());
+        decryptedRequest.setUsername(request.getUsername());
+        decryptedRequest.setPassword(decryptedPassword);
+        decryptedRequest.setDriverClassName(request.getDriverClassName());
+
+        return schemaAnalyzerService.analyze(decryptedRequest);
+    }
 
     @PostMapping("/git")
     public ApiResponse<SchemaMetadata> analyzeGitRepository(@RequestBody java.util.Map<String, String> payload) {

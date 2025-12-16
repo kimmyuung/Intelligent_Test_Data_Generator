@@ -20,16 +20,36 @@ const SourceSelectionStep = ({ onNext }) => {
         setFormData({ ...formData, file: e.target.files[0] });
     };
 
-    const handleSubmit = (e) => {
+
+    React.useEffect(() => {
+        // Fetch Public Key on component mount
+        import('../utils/EncryptionUtils').then(({ default: EncryptionUtils }) => {
+            EncryptionUtils.fetchPublicKey();
+        });
+    }, []);
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         let payload = { type: selectedTab };
-        /* 
+
         if (selectedTab === 'db') {
-            payload = { ...payload, url: formData.url, username: formData.username, password: formData.password };
-        } else 
-        */
-        if (selectedTab === 'git') {
+            // Encrypt Password
+            const { default: EncryptionUtils } = await import('../utils/EncryptionUtils');
+            const encryptedPassword = EncryptionUtils.encrypt(formData.password);
+
+            if (!encryptedPassword) {
+                alert("보안 키를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
+                return;
+            }
+
+            payload = {
+                ...payload,
+                url: formData.url,
+                username: formData.username,
+                password: encryptedPassword
+            };
+        } else if (selectedTab === 'git') {
             payload = { ...payload, gitUrl: formData.gitUrl };
         } else if (selectedTab === 'upload') {
             payload = { ...payload, file: formData.file };
@@ -41,22 +61,20 @@ const SourceSelectionStep = ({ onNext }) => {
     return (
         <div className="source-selection-container">
             <div className="tabs">
-                {/* 
                 <button
-                    className={`tab - btn ${ selectedTab === 'db' ? 'active' : '' } `}
+                    className={`tab-btn ${selectedTab === 'db' ? 'active' : ''}`}
                     onClick={() => setSelectedTab('db')}
                 >
-                    🗄️ 데이터베이스 연결
+                    <span className="icon">🗄️</span> 데이터베이스 연결
                 </button>
-                */}
                 <button
-                    className={`tab - btn ${selectedTab === 'git' ? 'active' : ''} `}
+                    className={`tab-btn ${selectedTab === 'git' ? 'active' : ''}`}
                     onClick={() => setSelectedTab('git')}
                 >
                     <span className="icon">🐙</span> GitHub 리포지토리
                 </button>
                 <button
-                    className={`tab - btn ${selectedTab === 'upload' ? 'active' : ''} `}
+                    className={`tab-btn ${selectedTab === 'upload' ? 'active' : ''}`}
                     onClick={() => setSelectedTab('upload')}
                 >
                     <span className="icon">📂</span> 프로젝트 업로드
@@ -64,15 +82,19 @@ const SourceSelectionStep = ({ onNext }) => {
             </div>
 
             <form className="selection-form" onSubmit={handleSubmit}>
-                {/* 
                 {selectedTab === 'db' && (
-                    <div className="tab-content">
+                    <div className="tab-content fade-in">
                         <h3>데이터베이스 정보 입력</h3>
+                        <p className="description">
+                            운영 중인 데이터베이스에 직접 접속하여 스키마를 분석합니다.
+                            <br />
+                            <span className="security-note">🔒 비밀번호는 RSA 알고리즘으로 안전하게 암호화되어 전송됩니다.</span>
+                        </p>
                         <div className="form-group">
                             <label>데이터베이스 주소 (JDBC URL)</label>
                             <input
                                 type="text" name="url"
-                                value={formData.url} onChange={handleInputChange}
+                                value={formData.url || ''} onChange={handleInputChange}
                                 placeholder="jdbc:postgresql://localhost:5432/mydb" required
                             />
                         </div>
@@ -80,68 +102,18 @@ const SourceSelectionStep = ({ onNext }) => {
                             <label>사용자명 (Username)</label>
                             <input
                                 type="text" name="username"
-                                value={formData.username} onChange={handleInputChange} required
+                                value={formData.username || ''} onChange={handleInputChange} required
                             />
                         </div>
                         <div className="form-group">
                             <label>비밀번호 (Password)</label>
                             <input
                                 type="password" name="password"
-                                value={formData.password} onChange={handleInputChange} required
+                                value={formData.password || ''} onChange={handleInputChange} required
                             />
                         </div>
                     </div>
                 )}
-                */}
-
-                {selectedTab === 'git' && (
-                    <div className="tab-content">
-                        <h3>GitHub 리포지토리 분석</h3>
-                        <p className="description">
-                            GitHub 리포지토리 주소를 입력하면, 코드를 분석하여 데이터베이스 스키마를 추출합니다.
-                        </p>
-                        <div className="form-group">
-                            <label className="label-with-tooltip">
-                                리포지토리 주소 (Git URL)
-                                <div className="tooltip-container">
-                                    <span className="help-icon">?</span>
-                                    <div className="tooltip-content">
-                                        <p>GitHub 페이지의 <strong>Code</strong> 버튼을 눌러 주소를 복사하세요.</p>
-                                        <img src="/images/git-clone-help.png" alt="Git URL Help" className="help-image" />
-                                    </div>
-                                </div>
-                            </label>
-                            <input
-                                type="text" name="gitUrl"
-                                value={formData.gitUrl} onChange={handleInputChange}
-                                placeholder="https://github.com/username/repository.git" required
-                            />
-                        </div>
-                    </div>
-                )}
-
-                {selectedTab === 'upload' && (
-                    <div className="tab-content">
-                        <h3>로컬 프로젝트 업로드</h3>
-                        <p className="description">
-                            로컬 프로젝트 폴더를 압축(zip)하여 업로드하세요. (Java/JPA, Python/Django 등)
-                        </p>
-                        <div className="form-group">
-                            <label>프로젝트 압축 파일 (.zip)</label>
-                            <input
-                                type="file" name="file"
-                                accept=".zip" onChange={handleFileChange} required
-                            />
-                        </div>
-                    </div>
-                )}
-
-                <button type="submit" className="next-btn" disabled={
-                    (selectedTab === 'git' && !formData.gitUrl) ||
-                    (selectedTab === 'upload' && !formData.file)
-                }>
-                    다음 단계로 이동 👉
-                </button>
             </form>
         </div>
     );

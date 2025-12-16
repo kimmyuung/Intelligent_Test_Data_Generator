@@ -20,5 +20,7 @@ public class ColumnMetadata {
     private Boolean isPrimaryKey;
     private Boolean isNullable;
     private Boolean isAutoIncrement;
+    private Boolean isForeignKey;
+    private String foreignKeyTargetTable;
     private String comment;
 }

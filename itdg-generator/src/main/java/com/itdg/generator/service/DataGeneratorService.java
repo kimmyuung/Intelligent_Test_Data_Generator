@@ -81,9 +81,16 @@ public class DataGeneratorService {
             // 1. Primary Key Handling
             if (Boolean.TRUE.equals(column.getIsPrimaryKey())) {
                 value = generatePrimaryKey(column, pkSequence);
-                valid = true; // PK is handled separately
+                valid = true;
+            }
+            // 2. Foreign Key Handling (Mock)
+            else if (Boolean.TRUE.equals(column.getIsForeignKey())) {
+                // Simulate referring to an existing ID from another table
+                // Assuming target table has at least 10 rows
+                value = random.nextInt(10) + 1; // 1 to 10
+                valid = true;
             } else {
-                // 2. Normal Column Generation with Retry for Unique Constraints
+                // 3. Normal Column Generation with Retry for Unique Constraints
                 for (int attempt = 0; attempt < maxRetries; attempt++) {
                     value = generateColumnValue(column, random);
 

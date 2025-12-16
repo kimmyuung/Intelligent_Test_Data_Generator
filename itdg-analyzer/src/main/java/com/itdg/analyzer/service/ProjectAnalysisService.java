@@ -32,8 +32,12 @@ public class ProjectAnalysisService {
                 .orElseThrow(() -> {
                     // 지원하는 파서가 없을 때, 어떤 언어인지 확인하여 상세 메시지 제공
                     String detectedType = detectProjectType(projectDir);
+                    String supported = parsers.stream()
+                            .map(p -> p.getClass().getSimpleName().replace("ProjectParser", ""))
+                            .reduce((a, b) -> a + ", " + b)
+                            .orElse("None");
                     return new AnalysisFailedException(
-                            "지원되지 않는 프로젝트 형식입니다. (" + detectedType + " 감지됨. 현재 Java/SQL만 지원)");
+                            "지원되지 않는 프로젝트 형식입니다. (" + detectedType + " 감지됨). 지원되는 형식: " + supported);
                 });
 
         log.info("Selected parser: {}", selectedParser.getClass().getSimpleName());
