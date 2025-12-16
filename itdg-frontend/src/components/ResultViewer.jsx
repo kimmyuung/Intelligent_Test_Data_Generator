@@ -10,34 +10,28 @@ const ResultViewer = ({ data }) => {
         setTimeout(() => setCopied(false), 2000);
     };
 
-    const handleDownloadSql = () => {
+    const handleDownload = (format) => {
         if (!data) return;
 
-        let sqlContent = "";
-        Object.keys(data).forEach(tableName => {
-            const rows = data[tableName];
-            if (Array.isArray(rows)) {
-                rows.forEach(row => {
-                    const columns = Object.keys(row);
-                    const values = Object.values(row).map(val => {
-                        if (val === null) return 'NULL';
-                        if (typeof val === 'number') return val;
-                        return `'${String(val).replace(/'/g, "''")}'`; // Escape single quotes
-                    });
-                    sqlContent += `INSERT INTO ${tableName} (${columns.join(", ")}) VALUES (${values.join(", ")});\n`;
-                });
-                sqlContent += "\n";
-            }
-        });
-
-        const blob = new Blob([sqlContent], { type: "text/sql;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = "generated_data.sql";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        switch (format) {
+            case 'sql':
+                import('../utils/ExportUtils').then(({ default: ExportUtils }) => ExportUtils.downloadSql(data));
+                break;
+            case 'csv':
+                import('../utils/ExportUtils').then(({ default: ExportUtils }) => ExportUtils.downloadCsv(data));
+                break;
+            case 'xlsx':
+                import('../utils/ExportUtils').then(({ default: ExportUtils }) => ExportUtils.downloadExcel(data, 'generated_data', 'xlsx'));
+                break;
+            case 'xls':
+                import('../utils/ExportUtils').then(({ default: ExportUtils }) => ExportUtils.downloadExcel(data, 'generated_data', 'xls'));
+                break;
+            case 'json':
+                import('../utils/ExportUtils').then(({ default: ExportUtils }) => ExportUtils.downloadJson(data));
+                break;
+            default:
+                break;
+        }
     };
 
     if (!data) return null;
@@ -50,9 +44,17 @@ const ResultViewer = ({ data }) => {
                     <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={handleCopy}>
                         {copied ? '복사됨!' : 'JSON 복사'}
                     </button>
-                    <button className="download-btn" onClick={handleDownloadSql}>
-                        💾 SQL 다운로드
-                    </button>
+
+                    <div className="dropdown">
+                        <button className="download-btn">💾 다운로드</button>
+                        <div className="dropdown-content">
+                            <button onClick={() => handleDownload('sql')}>SQL (.sql)</button>
+                            <button onClick={() => handleDownload('csv')}>CSV (.csv)</button>
+                            <button onClick={() => handleDownload('xlsx')}>Excel (.xlsx)</button>
+                            <button onClick={() => handleDownload('xls')}>Excel (.xls)</button>
+                            <button onClick={() => handleDownload('json')}>JSON (.json)</button>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div className="code-container">

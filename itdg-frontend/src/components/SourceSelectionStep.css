@@ -38,11 +38,24 @@
     animation: fadeIn 0.3s ease-in-out;
 }
 
+
 .tab-content h3 {
     margin-top: 0;
     margin-bottom: 20px;
     font-size: 1.2rem;
     color: #fff;
+}
+
+.security-note {
+    font-size: 0.9rem;
+    color: #4ade80;
+    /* Green */
+    font-weight: bold;
+    display: inline-block;
+    margin-top: 8px;
+    background: rgba(74, 222, 128, 0.1);
+    padding: 4px 8px;
+    border-radius: 4px;
 }
 
 .form-group {

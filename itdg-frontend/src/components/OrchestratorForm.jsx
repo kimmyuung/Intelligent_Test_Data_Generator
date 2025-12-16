@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ResultViewer from './ResultViewer';
 import SourceSelectionStep from './SourceSelectionStep';
 import SchemaReviewStep from './SchemaReviewStep';
 import './OrchestratorForm.css';
+import ErrorModal from './ErrorModal';
 
 const OrchestratorForm = () => {
     const [step, setStep] = useState(1); // 1: Source, 2: Review, 3: Result
@@ -14,6 +15,32 @@ const OrchestratorForm = () => {
     const [schemaMetadata, setSchemaMetadata] = useState(null);
     // 생성된 데이터 (Step 2 -> 3)
     const [generationResult, setGenerationResult] = useState(null);
+
+    // State Persistence
+    useEffect(() => {
+        const savedStep = sessionStorage.getItem('itdg_step');
+        const savedSchema = sessionStorage.getItem('itdg_schema');
+        const savedResult = sessionStorage.getItem('itdg_result');
+
+        if (savedStep) setStep(parseInt(savedStep));
+        if (savedSchema) setSchemaMetadata(JSON.parse(savedSchema));
+        if (savedResult) setGenerationResult(JSON.parse(savedResult));
+    }, []);
+
+    useEffect(() => {
+        sessionStorage.setItem('itdg_step', step);
+        if (schemaMetadata) sessionStorage.setItem('itdg_schema', JSON.stringify(schemaMetadata));
+        if (generationResult) sessionStorage.setItem('itdg_result', JSON.stringify(generationResult));
+    }, [step, schemaMetadata, generationResult]);
+
+    const resetState = () => {
+        sessionStorage.removeItem('itdg_step');
+        sessionStorage.removeItem('itdg_schema');
+        sessionStorage.removeItem('itdg_result');
+        setStep(1);
+        setSchemaMetadata(null);
+        setGenerationResult(null);
+    };
 
     // Step 1 완료: 소스 선택 및 분석 요청
     const handleSourceSelected = async (sourcePayload) => {
@@ -120,7 +147,7 @@ const OrchestratorForm = () => {
                     <SchemaReviewStep
                         schemaData={schemaMetadata}
                         onNext={handleGenerateData}
-                        onBack={() => setStep(1)}
+                        onBack={resetState}
                     />
                 </div>
             )}
@@ -129,25 +156,18 @@ const OrchestratorForm = () => {
                 <div className="step-wrapper fade-in">
                     <h2>Step 3. 생성 결과</h2>
                     <ResultViewer data={generationResult} />
-                    <button className="reset-btn" onClick={() => setStep(1)}>
+                    <button className="reset-btn" onClick={resetState}>
                         🔄 처음으로 돌아가기
                     </button>
                 </div>
             )}
 
             {/* Error/Result Modal */}
-            {error && (
-                <div className="modal-overlay">
-                    <div className="modal-content error-modal fade-in">
-                        <div className="modal-icon">ℹ️</div>
-                        <h3>분석 결과 안내</h3>
-                        <p>{error}</p>
-                        <button className="close-btn" onClick={() => setError(null)}>
-                            확인 후 돌아가기
-                        </button>
-                    </div>
-                </div>
-            )}
+            <ErrorModal
+                isOpen={!!error}
+                message={error}
+                onClose={() => setError(null)}
+            />
         </div>
     );
 };

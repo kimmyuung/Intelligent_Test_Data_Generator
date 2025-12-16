@@ -102,6 +102,35 @@ public class JPAProjectParser implements ProjectParser {
                     boolean isPk = field.isAnnotationPresent("Id");
                     boolean isNullable = isNullable(field);
 
+                    boolean isForeignKey = false;
+                    String targetTable = null;
+
+                    if (field.isAnnotationPresent("ManyToOne") || field.isAnnotationPresent("OneToOne")) {
+                        isForeignKey = true;
+                        // Simplistic assumption: field type name = table name (often true in this
+                        // project context or acceptable mock)
+                        // Or try to resolve generic type if collection (OneToMany) - but usually
+                        // OneToMany is not the owner side.
+                        // For ManyToOne, the field type (e.g. "User") is the target entity.
+                        targetTable = field.getElementType().asString();
+
+                        // Check if @JoinColumn override exists
+                        Optional<AnnotationExpr> joinCol = field.getAnnotationByName("JoinColumn");
+                        if (joinCol.isPresent() && joinCol.get().isNormalAnnotationExpr()) {
+                            for (var pair : joinCol.get().asNormalAnnotationExpr().getPairs()) {
+                                if (pair.getNameAsString().equals("name")) {
+                                    columnName = pair.getValue().toString().replace("\"", "");
+                                }
+                            }
+                        } else {
+                            // Default convention: entity_id
+                            columnName = field.getVariable(0).getNameAsString() + "_id";
+                        }
+
+                        // FKs are usually Long/Integer
+                        dataType = "BIGINT";
+                    }
+
                     if (isPk) {
                         primaryKeys.add(columnName);
                     }
@@ -111,6 +140,8 @@ public class JPAProjectParser implements ProjectParser {
                             .dataType(mapJavaTypeToSql(dataType))
                             .isPrimaryKey(isPk)
                             .isNullable(isNullable)
+                            .isForeignKey(isForeignKey)
+                            .foreignKeyTargetTable(targetTable)
                             .length(getColumnLength(field))
                             .build());
                 }
