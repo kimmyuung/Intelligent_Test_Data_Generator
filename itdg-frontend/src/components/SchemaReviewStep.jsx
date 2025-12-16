@@ -56,11 +56,17 @@ const SchemaReviewStep = ({ schemaData, onNext, onBack }) => {
             <div className={`project-badge ${projectInfo?.language?.toLowerCase() || 'unknown'}`}>
                 <span className="lang-icon">
                     {projectInfo?.language === 'Java' ? '☕' :
-                        projectInfo?.language === 'SQL' ? '🗃️' : '📁'}
+                        projectInfo?.language === 'SQL' ? '🗃️' :
+                            projectInfo?.language === 'Go' ? '🐹' :
+                                projectInfo?.language === 'Swift' ? '🍎' :
+                                    projectInfo?.language === 'Kotlin' ? '🟣' :
+                                        projectInfo?.language === 'C/C++' ? '🇨' :
+                                            projectInfo?.language === 'Python' ? '🐍' :
+                                                projectInfo?.language === 'Node.js/TypeScript' ? '🟩' : '📁'}
                 </span>
                 <div className="badge-info">
-                    <strong>감지된 프로젝트: {projectInfo?.language || 'Unknown'}</strong>
-                    <span>{projectInfo?.framework || 'No Framework Detected'}</span>
+                    <strong>감지된 프로젝트: {projectInfo?.language || '알 수 없음'}</strong>
+                    <span>{projectInfo?.framework || '프레임워크 미감지'}</span>
                     <span className="file-count">
                         (파일 {projectInfo?.analyzedFiles}/{projectInfo?.totalFiles}개 분석됨)
                     </span>

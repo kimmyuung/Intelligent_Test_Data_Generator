@@ -11,6 +11,7 @@
     animation: fadeIn 0.5s ease-out;
 }
 
+/* ResultViewer.css */
 .result-header {
     display: flex;
     justify-content: space-between;
@@ -24,7 +25,13 @@
     font-size: 1.5rem;
 }
 
-.copy-btn {
+.button-group {
+    display: flex;
+    gap: 10px;
+}
+
+.copy-btn,
+.download-btn {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid var(--glass-border);
     color: white;
@@ -35,7 +42,8 @@
     font-weight: 500;
 }
 
-.copy-btn:hover {
+.copy-btn:hover,
+.download-btn:hover {
     background: rgba(255, 255, 255, 0.2);
 }
 
@@ -43,6 +51,12 @@
     background: #10b981;
     border-color: #10b981;
 }
+
+.download-btn {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
 
 .code-container {
     background: rgba(0, 0, 0, 0.3);

@@ -132,7 +132,19 @@ const OrchestratorForm = () => {
                 </div>
             )}
 
-            {error && <div className="error-message">⚠️ {error}</div>}
+            {/* Error/Result Modal */}
+            {error && (
+                <div className="modal-overlay">
+                    <div className="modal-content error-modal fade-in">
+                        <div className="modal-icon">ℹ️</div>
+                        <h3>분석 결과 안내</h3>
+                        <p>{error}</p>
+                        <button className="close-btn" onClick={() => setError(null)}>
+                            확인 후 돌아가기
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

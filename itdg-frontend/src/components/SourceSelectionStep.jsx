@@ -63,7 +63,7 @@ const SourceSelectionStep = ({ onNext }) => {
                     <div className="tab-content">
                         <h3>데이터베이스 정보 입력</h3>
                         <div className="form-group">
-                            <label>JDBC URL</label>
+                            <label>데이터베이스 주소 (JDBC URL)</label>
                             <input
                                 type="text" name="url"
                                 value={formData.url} onChange={handleInputChange}
@@ -71,14 +71,14 @@ const SourceSelectionStep = ({ onNext }) => {
                             />
                         </div>
                         <div className="form-group">
-                            <label>Username</label>
+                            <label>사용자명 (Username)</label>
                             <input
                                 type="text" name="username"
                                 value={formData.username} onChange={handleInputChange} required
                             />
                         </div>
                         <div className="form-group">
-                            <label>Password</label>
+                            <label>비밀번호 (Password)</label>
                             <input
                                 type="password" name="password"
                                 value={formData.password} onChange={handleInputChange} required
@@ -91,7 +91,7 @@ const SourceSelectionStep = ({ onNext }) => {
                     <div className="tab-content">
                         <h3>GitHub 리포지토리 주소</h3>
                         <div className="form-group">
-                            <label>Repository URL</label>
+                            <label>리포지토리 주소 (Repository URL)</label>
                             <input
                                 type="url" name="gitUrl"
                                 value={formData.gitUrl} onChange={handleInputChange}

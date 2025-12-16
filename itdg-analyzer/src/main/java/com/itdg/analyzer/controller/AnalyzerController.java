@@ -6,6 +6,7 @@ import com.itdg.common.dto.metadata.SchemaMetadata;
 import com.itdg.common.dto.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/analyze")
 @RequiredArgsConstructor
+@CrossOrigin("*")
 public class AnalyzerController {
 
     private final SchemaAnalyzerService schemaAnalyzerService;
