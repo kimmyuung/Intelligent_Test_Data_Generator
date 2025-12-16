@@ -22,6 +22,7 @@ const OrchestratorForm = () => {
 
         try {
             let response;
+            /* 
             if (sourcePayload.type === 'db') {
                 response = await axios.post('http://localhost:8082/api/analyze', {
                     url: sourcePayload.url,
@@ -29,7 +30,9 @@ const OrchestratorForm = () => {
                     password: sourcePayload.password,
                     driverClassName: "org.postgresql.Driver" // TODO: Detect from URL
                 });
-            } else if (sourcePayload.type === 'git') {
+            } else 
+            */
+            if (sourcePayload.type === 'git') {
                 response = await axios.post('http://localhost:8082/api/analyze/git', {
                     url: sourcePayload.gitUrl
                 });

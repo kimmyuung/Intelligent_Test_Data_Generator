@@ -24,11 +24,14 @@ public class AnalyzerController {
     private final com.itdg.analyzer.service.SourceHelperService sourceHelperService;
     private final com.itdg.analyzer.service.ProjectAnalysisService projectAnalysisService;
 
-    @PostMapping
-    public ApiResponse<SchemaMetadata> analyzeSchema(@RequestBody DbConnectionRequest request) {
-        log.info("Received analysis request for URL: {}", request.getUrl());
-        return schemaAnalyzerService.analyze(request);
-    }
+    /*
+     * @PostMapping
+     * public ApiResponse<SchemaMetadata> analyzeSchema(@RequestBody
+     * DbConnectionRequest request) {
+     * log.info("Received analysis request for URL: {}", request.getUrl());
+     * return schemaAnalyzerService.analyze(request);
+     * }
+     */
 
     @PostMapping("/git")
     public ApiResponse<SchemaMetadata> analyzeGitRepository(@RequestBody java.util.Map<String, String> payload) {
