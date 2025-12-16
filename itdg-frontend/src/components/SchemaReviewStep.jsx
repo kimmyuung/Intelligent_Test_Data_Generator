@@ -134,14 +134,13 @@ const SchemaReviewStep = ({ schemaData, onNext, onBack }) => {
                                     />
                                 </div>
                                 <div className="learning-section">
-                                    <button 
+                                    <button
                                         className={`learn-btn ${learnedData[table.tableName] ? 'learned' : ''}`}
                                         onClick={() => openLearningModal(table.tableName)}
                                     >
                                         {learnedData[table.tableName] ? '✅ 학습 완료' : '📈 데이터 학습시키기'}
                                     </button>
                                 </div>
-                            </div>
                             </div>
                         )}
                     </div>
@@ -155,14 +154,14 @@ const SchemaReviewStep = ({ schemaData, onNext, onBack }) => {
                 </button>
             </div>
             {
-        learningModalOpen && (
-            <SampleUploadModal
-                tableName={currentTableForLearning}
-                onClose={() => setLearningModalOpen(false)}
-                onAnalyzeComplete={handleLearningComplete}
-            />
-        )
-    }
+                learningModalOpen && (
+                    <SampleUploadModal
+                        tableName={currentTableForLearning}
+                        onClose={() => setLearningModalOpen(false)}
+                        onAnalyzeComplete={handleLearningComplete}
+                    />
+                )
+            }
         </div >
     );
 };
