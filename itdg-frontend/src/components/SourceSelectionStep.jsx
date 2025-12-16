@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import './SourceSelectionStep.css';
 
 const SourceSelectionStep = ({ onNext }) => {
-    const [selectedTab, setSelectedTab] = useState('db');
+    const [selectedTab, setSelectedTab] = useState('git'); // Default changed from 'db' to 'git'
     const [formData, setFormData] = useState({
-        url: 'jdbc:postgresql://localhost:5432/itdg',
-        username: 'itdg',
-        password: '',
+        // url: 'jdbc:postgresql://localhost:5432/itdg',
+        // username: 'itdg',
+        // password: '',
         gitUrl: 'https://github.com/sukh115/GDD',
         file: null
     });
@@ -24,9 +24,12 @@ const SourceSelectionStep = ({ onNext }) => {
         e.preventDefault();
 
         let payload = { type: selectedTab };
+        /* 
         if (selectedTab === 'db') {
             payload = { ...payload, url: formData.url, username: formData.username, password: formData.password };
-        } else if (selectedTab === 'git') {
+        } else 
+        */
+        if (selectedTab === 'git') {
             payload = { ...payload, gitUrl: formData.gitUrl };
         } else if (selectedTab === 'upload') {
             payload = { ...payload, file: formData.file };
@@ -38,12 +41,14 @@ const SourceSelectionStep = ({ onNext }) => {
     return (
         <div className="source-selection-container">
             <div className="tabs">
+                {/* 
                 <button
                     className={`tab-btn ${selectedTab === 'db' ? 'active' : ''}`}
                     onClick={() => setSelectedTab('db')}
                 >
                     🗄️ 데이터베이스 연결
                 </button>
+                */}
                 <button
                     className={`tab-btn ${selectedTab === 'git' ? 'active' : ''}`}
                     onClick={() => setSelectedTab('git')}
@@ -59,11 +64,12 @@ const SourceSelectionStep = ({ onNext }) => {
             </div>
 
             <form className="selection-form" onSubmit={handleSubmit}>
+                {/* 
                 {selectedTab === 'db' && (
                     <div className="tab-content">
                         <h3>데이터베이스 정보 입력</h3>
                         <div className="form-group">
-                            <label>JDBC URL</label>
+                            <label>데이터베이스 주소 (JDBC URL)</label>
                             <input
                                 type="text" name="url"
                                 value={formData.url} onChange={handleInputChange}
@@ -71,14 +77,14 @@ const SourceSelectionStep = ({ onNext }) => {
                             />
                         </div>
                         <div className="form-group">
-                            <label>Username</label>
+                            <label>사용자명 (Username)</label>
                             <input
                                 type="text" name="username"
                                 value={formData.username} onChange={handleInputChange} required
                             />
                         </div>
                         <div className="form-group">
-                            <label>Password</label>
+                            <label>비밀번호 (Password)</label>
                             <input
                                 type="password" name="password"
                                 value={formData.password} onChange={handleInputChange} required
@@ -86,12 +92,13 @@ const SourceSelectionStep = ({ onNext }) => {
                         </div>
                     </div>
                 )}
+                */}
 
                 {selectedTab === 'git' && (
                     <div className="tab-content">
                         <h3>GitHub 리포지토리 주소</h3>
                         <div className="form-group">
-                            <label>Repository URL</label>
+                            <label>리포지토리 주소 (Repository URL)</label>
                             <input
                                 type="url" name="gitUrl"
                                 value={formData.gitUrl} onChange={handleInputChange}

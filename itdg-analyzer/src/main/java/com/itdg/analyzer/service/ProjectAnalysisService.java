@@ -29,7 +29,12 @@ public class ProjectAnalysisService {
         ProjectParser selectedParser = parsers.stream()
                 .filter(parser -> parser.supports(projectDir))
                 .findFirst()
-                .orElseThrow(() -> new AnalysisFailedException("지원되지 않는 프로젝트 형식입니다. (Java Entity 또는 SQL 파일 없음)"));
+                .orElseThrow(() -> {
+                    // 지원하는 파서가 없을 때, 어떤 언어인지 확인하여 상세 메시지 제공
+                    String detectedType = detectProjectType(projectDir);
+                    return new AnalysisFailedException(
+                            "지원되지 않는 프로젝트 형식입니다. (" + detectedType + " 감지됨. 현재 Java/SQL만 지원)");
+                });
 
         log.info("Selected parser: {}", selectedParser.getClass().getSimpleName());
 
@@ -50,5 +55,15 @@ public class ProjectAnalysisService {
                 .analyzedAt(LocalDateTime.now())
                 .projectInfo(projectInfo)
                 .build();
+    }
+
+    private String detectProjectType(File projectDir) {
+        if (new File(projectDir, "package.json").exists())
+            return "JavaScript/Node.js";
+        if (new File(projectDir, "requirements.txt").exists())
+            return "Python";
+        if (new File(projectDir, "pom.xml").exists() || new File(projectDir, "build.gradle").exists())
+            return "Java (Entity 없음)";
+        return "Unknown";
     }
 }
