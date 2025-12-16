@@ -1,0 +1,149 @@
+/* SampleUploadModal.css */
+.sample-upload-modal {
+    max-width: 500px;
+    text-align: left;
+    transition: all 0.3s ease;
+}
+
+.sample-upload-modal.wide {
+    max-width: 800px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: white;
+}
+
+.close-btn-icon {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.description {
+    color: #ccc;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.file-input-wrapper {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 2rem;
+    border-radius: 8px;
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.hint {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+}
+
+.error-msg {
+    color: #fb7185;
+    background: rgba(251, 113, 133, 0.1);
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.cancel-btn {
+    background: transparent;
+    border: 1px solid #666;
+    color: #ccc;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.analyze-btn,
+.confirm-btn {
+    background: var(--primary-color);
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.analyze-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Result Styles */
+.result-summary {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    color: #d1fae5;
+}
+
+.file-info {
+    font-size: 0.85rem;
+    color: #6ee7b7;
+    margin-top: 5px;
+}
+
+.stats-table-wrapper {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.stats-table th,
+.stats-table td {
+    padding: 0.8rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stats-table th {
+    background: rgba(0, 0, 0, 0.3);
+    color: #ccc;
+    position: sticky;
+    top: 0;
+}
+
+.stats-table td {
+    color: white;
+}
+
+.info-msg {
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 1rem;
+    text-align: right;
+}

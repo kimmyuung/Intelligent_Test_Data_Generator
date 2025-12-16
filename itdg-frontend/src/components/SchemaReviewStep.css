@@ -158,3 +158,34 @@
     background: rgba(255, 255, 255, 0.1);
     color: white;
 }
+
+/* Learning Button Styles */
+.learning-section {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.learn-btn {
+    background-color: transparent;
+    border: 1px solid #646cff;
+    color: #646cff;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.learn-btn:hover {
+    background-color: rgba(100, 108, 255, 0.1);
+}
+
+.learn-btn.learned {
+    background-color: rgba(16, 185, 129, 0.1);
+    border-color: #10b981;
+    color: #10b981;
+}
