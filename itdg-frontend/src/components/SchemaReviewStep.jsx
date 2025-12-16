@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import SampleUploadModal from './SampleUploadModal';
 import './SchemaReviewStep.css';
 
 const SchemaReviewStep = ({ schemaData, onNext, onBack }) => {
     const [selectedTables, setSelectedTables] = useState({});
     const [tableSettings, setTableSettings] = useState({});
+
+    // ML Learning State
+    const [learningModalOpen, setLearningModalOpen] = useState(false);
+    const [currentTableForLearning, setCurrentTableForLearning] = useState(null);
+    const [learnedData, setLearnedData] = useState({}); // { tableName: { fileId, stats } }
 
     useEffect(() => {
         // 초기화: 모든 테이블 선택 및 기본 rowCount 설정
@@ -40,10 +46,23 @@ const SchemaReviewStep = ({ schemaData, onNext, onBack }) => {
             .filter(t => selectedTables[t.tableName])
             .map(t => ({
                 ...t,
-                targetRowCount: tableSettings[t.tableName]?.rowCount || 5
+                targetRowCount: tableSettings[t.tableName]?.rowCount || 5,
+                learningData: learnedData[t.tableName] // Include learned stats if available
             }));
 
         onNext({ tables: finalTables });
+    };
+
+    const openLearningModal = (tableName) => {
+        setCurrentTableForLearning(tableName);
+        setLearningModalOpen(true);
+    };
+
+    const handleLearningComplete = (tableName, result) => {
+        setLearnedData(prev => ({
+            ...prev,
+            [tableName]: result
+        }));
     };
 
     if (!schemaData) return <div>데이터 로딩 중...</div>;
@@ -114,6 +133,14 @@ const SchemaReviewStep = ({ schemaData, onNext, onBack }) => {
                                         onChange={(e) => handleRowCountChange(table.tableName, e.target.value)}
                                     />
                                 </div>
+                                <div className="learning-section">
+                                    <button
+                                        className={`learn-btn ${learnedData[table.tableName] ? 'learned' : ''}`}
+                                        onClick={() => openLearningModal(table.tableName)}
+                                    >
+                                        {learnedData[table.tableName] ? '✅ 학습 완료' : '📈 데이터 학습시키기'}
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>
@@ -126,7 +153,16 @@ const SchemaReviewStep = ({ schemaData, onNext, onBack }) => {
                     ✨ 데이터 생성하기 ({Object.values(selectedTables).filter(v => v).length}개 테이블)
                 </button>
             </div>
-        </div>
+            {
+                learningModalOpen && (
+                    <SampleUploadModal
+                        tableName={currentTableForLearning}
+                        onClose={() => setLearningModalOpen(false)}
+                        onAnalyzeComplete={handleLearningComplete}
+                    />
+                )
+            }
+        </div >
     );
 };
 
