@@ -2,22 +2,22 @@ import React, { useState } from 'react';
 import './SourceSelectionStep.css';
 
 const SourceSelectionStep = ({ onNext }) => {
-    const [selectedTab, setSelectedTab] = useState('git'); // Default changed from 'db' to 'git'
+    const [selectedTab, setSelectedTab] = useState('git');
     const [formData, setFormData] = useState({
         // url: 'jdbc:postgresql://localhost:5432/itdg',
         // username: 'itdg',
         // password: '',
-        gitUrl: 'https://github.com/sukh115/GDD',
+        gitUrl: '', // Default cleared
         file: null
     });
 
     const handleInputChange = (e) => {
-        const { name, value, files } = e.target;
-        if (name === 'file') {
-            setFormData(prev => ({ ...prev, file: files[0] }));
-        } else {
-            setFormData(prev => ({ ...prev, [name]: value }));
-        }
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+    };
+
+    const handleFileChange = (e) => {
+        setFormData({ ...formData, file: e.target.files[0] });
     };
 
     const handleSubmit = (e) => {
@@ -43,23 +43,23 @@ const SourceSelectionStep = ({ onNext }) => {
             <div className="tabs">
                 {/* 
                 <button
-                    className={`tab-btn ${selectedTab === 'db' ? 'active' : ''}`}
+                    className={`tab - btn ${ selectedTab === 'db' ? 'active' : '' } `}
                     onClick={() => setSelectedTab('db')}
                 >
                     🗄️ 데이터베이스 연결
                 </button>
                 */}
                 <button
-                    className={`tab-btn ${selectedTab === 'git' ? 'active' : ''}`}
+                    className={`tab - btn ${selectedTab === 'git' ? 'active' : ''} `}
                     onClick={() => setSelectedTab('git')}
                 >
-                    🐙 GitHub 리포지토리
+                    <span className="icon">🐙</span> GitHub 리포지토리
                 </button>
                 <button
-                    className={`tab-btn ${selectedTab === 'upload' ? 'active' : ''}`}
+                    className={`tab - btn ${selectedTab === 'upload' ? 'active' : ''} `}
                     onClick={() => setSelectedTab('upload')}
                 >
-                    📁 로컬 프로젝트 업로드
+                    <span className="icon">📂</span> 프로젝트 업로드
                 </button>
             </div>
 
@@ -96,40 +96,51 @@ const SourceSelectionStep = ({ onNext }) => {
 
                 {selectedTab === 'git' && (
                     <div className="tab-content">
-                        <h3>GitHub 리포지토리 주소</h3>
+                        <h3>GitHub 리포지토리 분석</h3>
+                        <p className="description">
+                            GitHub 리포지토리 주소를 입력하면, 코드를 분석하여 데이터베이스 스키마를 추출합니다.
+                        </p>
                         <div className="form-group">
-                            <label>리포지토리 주소 (Repository URL)</label>
+                            <label className="label-with-tooltip">
+                                리포지토리 주소 (Git URL)
+                                <div className="tooltip-container">
+                                    <span className="help-icon">?</span>
+                                    <div className="tooltip-content">
+                                        <p>GitHub 페이지의 <strong>Code</strong> 버튼을 눌러 주소를 복사하세요.</p>
+                                        <img src="/images/git-clone-help.png" alt="Git URL Help" className="help-image" />
+                                    </div>
+                                </div>
+                            </label>
                             <input
-                                type="url" name="gitUrl"
+                                type="text" name="gitUrl"
                                 value={formData.gitUrl} onChange={handleInputChange}
-                                placeholder="https://github.com/username/repo" required
+                                placeholder="https://github.com/username/repository.git" required
                             />
                         </div>
-                        <p className="hint">
-                            * 공개 리포지토리(Public)만 지원됩니다.<br />
-                            * Java(JPA) 또는 SQL(DDL) 파일이 포함되어 있어야 분석 가능합니다.
-                        </p>
                     </div>
                 )}
 
                 {selectedTab === 'upload' && (
                     <div className="tab-content">
-                        <h3>프로젝트 압축 파일 업로드</h3>
-                        <div className="dropbox">
+                        <h3>로컬 프로젝트 업로드</h3>
+                        <p className="description">
+                            로컬 프로젝트 폴더를 압축(zip)하여 업로드하세요. (Java/JPA, Python/Django 등)
+                        </p>
+                        <div className="form-group">
+                            <label>프로젝트 압축 파일 (.zip)</label>
                             <input
                                 type="file" name="file"
-                                accept=".zip" onChange={handleInputChange} required
+                                accept=".zip" onChange={handleFileChange} required
                             />
-                            <p>프로젝트 폴더를 .zip으로 압축하여 업로드하세요.</p>
                         </div>
-                        <p className="hint">
-                            * .sql 파일이나 Java Entity 클래스가 포함된 프로젝트여야 합니다.
-                        </p>
                     </div>
                 )}
 
-                <button type="submit" className="next-btn">
-                    다음 단계로 (분석 시작) 👉
+                <button type="submit" className="next-btn" disabled={
+                    (selectedTab === 'git' && !formData.gitUrl) ||
+                    (selectedTab === 'upload' && !formData.file)
+                }>
+                    다음 단계로 이동 👉
                 </button>
             </form>
         </div>
