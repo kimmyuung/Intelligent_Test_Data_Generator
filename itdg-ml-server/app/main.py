@@ -8,16 +8,21 @@ import os
 import shutil
 
 from app.api.v1.endpoints import analysis
+from app.api.v1.endpoints import synthesis
 from app.services.file_manager import start_cleanup_task, stop_cleanup_task
+from app.services.synthesizer import start_models_cleanup_task, stop_models_cleanup_task
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: Create temp directory and start cleanup thread
+    # Startup: Create temp/models directories and start cleanup threads
     os.makedirs("temp", exist_ok=True)
+    os.makedirs("models", exist_ok=True)
     cleanup_thread = start_cleanup_task()
+    models_cleanup_thread = start_models_cleanup_task()
     yield
-    # Shutdown: Stop cleanup thread
+    # Shutdown: Stop cleanup threads
     stop_cleanup_task()
+    stop_models_cleanup_task()
     # Optional: Clean up all temp files on shutdown?
     # shutil.rmtree("temp", ignore_errors=True)
 
@@ -44,6 +49,7 @@ app.add_middleware(
 )
 
 app.include_router(analysis.router, prefix="/api/v1", tags=["analysis"])
+app.include_router(synthesis.router, prefix="/api/v1", tags=["synthesis"])
 
 @app.get("/health")
 def health_check():
@@ -51,3 +57,4 @@ def health_check():
 
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+

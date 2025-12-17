@@ -19,6 +19,9 @@ dependencies {
     // JSON
     implementation 'com.fasterxml.jackson.core:jackson-databind'
 
+    // Excel (XLSX) 파일 처리
+    implementation 'org.apache.poi:poi-ooxml:5.2.5'
+
     // Actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
