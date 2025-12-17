@@ -14,6 +14,9 @@ public class WebClientConfig {
     @Value("${generator.service.url}")
     private String generatorServiceUrl;
 
+    @Value("${mlserver.service.url}")
+    private String mlServerServiceUrl;
+
     @Bean(name = "analyzerWebClient")
     public WebClient analyzerWebClient() {
         return WebClient.builder()
@@ -25,6 +28,13 @@ public class WebClientConfig {
     public WebClient generatorWebClient() {
         return WebClient.builder()
                 .baseUrl(generatorServiceUrl)
+                .build();
+    }
+
+    @Bean(name = "mlServerWebClient")
+    public WebClient mlServerWebClient() {
+        return WebClient.builder()
+                .baseUrl(mlServerServiceUrl)
                 .build();
     }
 }

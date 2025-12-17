@@ -6,7 +6,7 @@ import com.itdg.common.dto.request.GenerateDataRequest;
 import com.itdg.common.dto.response.ApiResponse;
 import com.itdg.common.dto.response.GenerateDataResponse;
 import com.itdg.common.dto.response.HealthCheckResponse;
-import lombok.RequiredArgsConstructor;
+import com.itdg.orchestrator.dto.MlServerDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
@@ -19,14 +19,20 @@ import java.util.Map;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class ServiceCommunicationService {
 
-    @Qualifier("analyzerWebClient")
     private final WebClient analyzerWebClient;
-
-    @Qualifier("generatorWebClient")
     private final WebClient generatorWebClient;
+    private final WebClient mlServerWebClient;
+
+    public ServiceCommunicationService(
+            @Qualifier("analyzerWebClient") WebClient analyzerWebClient,
+            @Qualifier("generatorWebClient") WebClient generatorWebClient,
+            @Qualifier("mlServerWebClient") WebClient mlServerWebClient) {
+        this.analyzerWebClient = analyzerWebClient;
+        this.generatorWebClient = generatorWebClient;
+        this.mlServerWebClient = mlServerWebClient;
+    }
 
     /**
      * Analyzer 서비스의 헬스체크 호출
@@ -57,6 +63,19 @@ public class ServiceCommunicationService {
     }
 
     /**
+     * ML Server 헬스체크 호출
+     */
+    public Mono<MlServerDto.HealthResponse> checkMlServerHealth() {
+        log.info("Calling ML Server health check");
+        return mlServerWebClient.get()
+                .uri("/health")
+                .retrieve()
+                .bodyToMono(MlServerDto.HealthResponse.class)
+                .doOnSuccess(response -> log.info("ML Server health check successful: {}", response))
+                .doOnError(error -> log.error("ML Server health check failed", error));
+    }
+
+    /**
      * Analyzer 서비스에 DB 스키마 추출 요청
      */
     public Mono<ApiResponse<SchemaMetadata>> extractSchema(DbConnectionRequest request) {
@@ -76,12 +95,6 @@ public class ServiceCommunicationService {
      */
     public Mono<GenerateDataResponse> generateData(GenerateDataRequest request) {
         log.info("Calling Generator generate data");
-        // Generator Controller returns ResponseEntity<GenerateDataResponse> directly,
-        // NOT ApiResponse wrapper based on prev implementation
-        // But let's check current GeneratorController implementation...
-        // GeneratorController: return ResponseEntity.ok(response); where response is
-        // GenerateDataResponse.
-
         return generatorWebClient.post()
                 .uri("/api/generator/generate")
                 .bodyValue(request)
@@ -92,7 +105,7 @@ public class ServiceCommunicationService {
     }
 
     /**
-     * 모든 서비스의 헬스체크를 동시에 호출
+     * 모든 서비스의 헬스체크를 동시에 호출 (ML Server 포함)
      */
     public Mono<Map<String, Object>> checkAllServicesHealth() {
         log.info("Checking all services health");
@@ -109,11 +122,18 @@ public class ServiceCommunicationService {
                     return Mono.just(ApiResponse.error("Generator service is unavailable"));
                 });
 
-        return Mono.zip(analyzerHealth, generatorHealth)
+        Mono<MlServerDto.HealthResponse> mlServerHealth = checkMlServerHealth()
+                .onErrorResume(error -> {
+                    log.error("ML Server is down", error);
+                    return Mono.just(MlServerDto.HealthResponse.builder().status("unavailable").build());
+                });
+
+        return Mono.zip(analyzerHealth, generatorHealth, mlServerHealth)
                 .map(tuple -> {
                     Map<String, Object> result = new HashMap<>();
                     result.put("analyzer", tuple.getT1());
                     result.put("generator", tuple.getT2());
+                    result.put("mlServer", tuple.getT3());
                     return result;
                 });
     }

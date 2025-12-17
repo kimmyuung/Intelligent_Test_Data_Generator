@@ -21,6 +21,7 @@ public class ColumnMetadata {
     private Boolean isNullable;
     private Boolean isAutoIncrement;
     private Boolean isForeignKey;
+    private Boolean isUnique;
     private String foreignKeyTargetTable;
     private String comment;
 }

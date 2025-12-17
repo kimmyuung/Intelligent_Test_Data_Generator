@@ -114,6 +114,56 @@ const SourceSelectionStep = ({ onNext }) => {
                         </div>
                     </div>
                 )}
+
+                {selectedTab === 'git' && (
+                    <div className="tab-content fade-in">
+                        <h3>GitHub 리포지토리 분석</h3>
+                        <p className="description">
+                            GitHub 리포지토리 URL을 입력하면 프로젝트의 엔티티와 스키마를 자동으로 분석합니다.
+                            <br />
+                            <span className="security-note">🔍 Java, Kotlin, Python, Go, Swift, C#, Ruby, PHP, Rust, TypeScript, C/C++, SQL 등 12+ 언어 지원</span>
+                        </p>
+                        <div className="form-group">
+                            <label>GitHub 리포지토리 URL</label>
+                            <input
+                                type="text" name="gitUrl"
+                                value={formData.gitUrl || ''} onChange={handleInputChange}
+                                placeholder="https://github.com/username/repository" required
+                            />
+                        </div>
+                        <button type="submit" className="submit-btn">
+                            🚀 분석 시작
+                        </button>
+                    </div>
+                )}
+
+                {selectedTab === 'upload' && (
+                    <div className="tab-content fade-in">
+                        <h3>프로젝트 파일 업로드</h3>
+                        <p className="description">
+                            로컬 프로젝트 파일을 ZIP으로 압축하여 업로드하면 스키마를 분석합니다.
+                            <br />
+                            <span className="security-note">📦 ZIP 파일만 지원됩니다.</span>
+                        </p>
+                        <div className="form-group">
+                            <label>프로젝트 ZIP 파일</label>
+                            <div className="file-upload-wrapper">
+                                <input
+                                    type="file" name="projectFile"
+                                    accept=".zip"
+                                    onChange={handleFileChange}
+                                    required
+                                />
+                                {formData.file && (
+                                    <p className="file-selected">✅ 선택된 파일: {formData.file.name}</p>
+                                )}
+                            </div>
+                        </div>
+                        <button type="submit" className="submit-btn">
+                            🚀 업로드 및 분석 시작
+                        </button>
+                    </div>
+                )}
             </form>
         </div>
     );

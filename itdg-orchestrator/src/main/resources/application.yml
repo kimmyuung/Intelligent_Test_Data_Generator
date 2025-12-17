@@ -46,3 +46,7 @@ analyzer:
 generator:
   service:
     url: http://localhost:8083
+
+mlserver:
+  service:
+    url: http://localhost:8000
