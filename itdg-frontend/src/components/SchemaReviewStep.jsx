@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import SampleUploadModal from './SampleUploadModal';
+import MultiTableLearningModal from './MultiTableLearningModal';
 import './SchemaReviewStep.css';
 
 const SchemaReviewStep = ({ schemaData, onNext, onBack }) => {
@@ -10,6 +11,10 @@ const SchemaReviewStep = ({ schemaData, onNext, onBack }) => {
     const [learningModalOpen, setLearningModalOpen] = useState(false);
     const [currentTableForLearning, setCurrentTableForLearning] = useState(null);
     const [learnedData, setLearnedData] = useState({}); // { tableName: { fileId, stats } }
+
+    // Multi-Table Learning State
+    const [multiTableModalOpen, setMultiTableModalOpen] = useState(false);
+    const [multiTableModelId, setMultiTableModelId] = useState(null);
 
     useEffect(() => {
         // 초기화: 모든 테이블 선택 및 기본 rowCount 설정
@@ -50,7 +55,10 @@ const SchemaReviewStep = ({ schemaData, onNext, onBack }) => {
                 learningData: learnedData[t.tableName] // Include learned stats if available
             }));
 
-        onNext({ tables: finalTables });
+        onNext({
+            tables: finalTables,
+            multiTableModelId: multiTableModelId // Pass multi-table model ID if available
+        });
     };
 
     const openLearningModal = (tableName) => {
@@ -149,6 +157,18 @@ const SchemaReviewStep = ({ schemaData, onNext, onBack }) => {
 
             <div className="action-buttons">
                 <button className="back-btn" onClick={onBack}>👈 다시 선택</button>
+
+                {/* 다중 테이블 학습 버튼 - 2개 이상 테이블 선택 시 표시 */}
+                {Object.values(selectedTables).filter(v => v).length >= 2 && (
+                    <button
+                        className="multi-table-btn"
+                        onClick={() => setMultiTableModalOpen(true)}
+                    >
+                        🔗 다중 테이블 학습
+                        {multiTableModelId && ' ✅'}
+                    </button>
+                )}
+
                 <button className="generate-btn" onClick={handleGenerate}>
                     ✨ 데이터 생성하기 ({Object.values(selectedTables).filter(v => v).length}개 테이블)
                 </button>
@@ -159,6 +179,19 @@ const SchemaReviewStep = ({ schemaData, onNext, onBack }) => {
                         tableName={currentTableForLearning}
                         onClose={() => setLearningModalOpen(false)}
                         onAnalyzeComplete={handleLearningComplete}
+                    />
+                )
+            }
+            {
+                multiTableModalOpen && (
+                    <MultiTableLearningModal
+                        isOpen={multiTableModalOpen}
+                        onClose={() => setMultiTableModalOpen(false)}
+                        tables={schemaData.tables.filter(t => selectedTables[t.tableName])}
+                        onTrainingComplete={(result) => {
+                            setMultiTableModelId(result.modelId);
+                            console.log('Multi-table model trained:', result);
+                        }}
                     />
                 )
             }

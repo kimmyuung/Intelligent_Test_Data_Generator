@@ -189,3 +189,28 @@
     border-color: #10b981;
     color: #10b981;
 }
+
+/* Multi-Table Learning Button */
+.multi-table-btn {
+    background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.multi-table-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(14, 165, 233, 0.35);
+}
+
+.multi-table-btn:active {
+    transform: translateY(0);
+}
