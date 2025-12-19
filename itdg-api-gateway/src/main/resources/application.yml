@@ -1,0 +1,216 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: itdg-api-gateway
+  
+  cloud:
+    gateway:
+      # 글로벌 CORS 설정
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:3000"
+              - "http://localhost:8888"
+              - "http://itdg.local"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+            maxAge: 3600
+      
+      # 기본 필터
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+        - name: Retry
+          args:
+            retries: 3
+            statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE,GATEWAY_TIMEOUT
+            methods: GET,POST
+            backoff:
+              firstBackoff: 100ms
+              maxBackoff: 500ms
+              factor: 2
+              basedOnPreviousValue: false
+      
+      # 라우트 정의
+      routes:
+        # =====================================
+        # Orchestrator 라우트
+        # =====================================
+        - id: orchestrator-api
+          uri: lb://orchestrator
+          predicates:
+            - Path=/api/orchestrator/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: orchestratorCircuitBreaker
+                fallbackUri: forward:/fallback/orchestrator
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 200
+                key-resolver: "#{@userKeyResolver}"
+        
+        # Orchestrator 스트리밍 (별도 타임아웃)
+        - id: orchestrator-stream
+          uri: lb://orchestrator
+          predicates:
+            - Path=/api/orchestrator/stream/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: streamCircuitBreaker
+          metadata:
+            response-timeout: 300000  # 5분 (스트리밍용)
+            connect-timeout: 5000
+        
+        # =====================================
+        # ML API 라우트 (Orchestrator 프록시 경유)
+        # =====================================
+        - id: ml-api
+          uri: lb://orchestrator
+          predicates:
+            - Path=/api/ml/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: mlCircuitBreaker
+                fallbackUri: forward:/fallback/ml
+          metadata:
+            response-timeout: 120000  # 2분 (학습 시간)
+            connect-timeout: 5000
+        
+        # =====================================
+        # Analyzer 라우트
+        # =====================================
+        - id: analyzer-api
+          uri: lb://analyzer
+          predicates:
+            - Path=/api/analyze/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: analyzerCircuitBreaker
+                fallbackUri: forward:/fallback/analyzer
+          metadata:
+            response-timeout: 60000
+            connect-timeout: 5000
+        
+        # =====================================
+        # Generator 라우트
+        # =====================================
+        - id: generator-api
+          uri: lb://generator
+          predicates:
+            - Path=/api/generator/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: generatorCircuitBreaker
+                fallbackUri: forward:/fallback/generator
+        
+        # =====================================
+        # 헬스체크 통합 엔드포인트
+        # =====================================
+        - id: health-orchestrator
+          uri: lb://orchestrator
+          predicates:
+            - Path=/health/orchestrator
+          filters:
+            - RewritePath=/health/orchestrator, /api/health
+        
+        - id: health-analyzer
+          uri: lb://analyzer
+          predicates:
+            - Path=/health/analyzer
+          filters:
+            - RewritePath=/health/analyzer, /api/health
+        
+        - id: health-generator
+          uri: lb://generator
+          predicates:
+            - Path=/health/generator
+          filters:
+            - RewritePath=/health/generator, /api/health
+
+# =====================================
+# 서비스 디스커버리 (로드밸런싱)
+# =====================================
+  # 개발 환경에서는 정적 서비스 URL 사용
+  # 프로덕션에서는 Eureka/Consul 사용
+
+# Redis (Rate Limiter 용)
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+# =====================================
+# Resilience4j 설정
+# =====================================
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 10s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+    instances:
+      orchestratorCircuitBreaker:
+        baseConfig: default
+      analyzerCircuitBreaker:
+        baseConfig: default
+      generatorCircuitBreaker:
+        baseConfig: default
+      mlCircuitBreaker:
+        baseConfig: default
+        waitDurationInOpenState: 30s  # ML은 더 긴 대기
+      streamCircuitBreaker:
+        baseConfig: default
+        waitDurationInOpenState: 60s  # 스트리밍은 더 긴 대기
+  
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 30s
+    instances:
+      orchestratorCircuitBreaker:
+        timeoutDuration: 30s
+      streamCircuitBreaker:
+        timeoutDuration: 300s  # 5분
+
+# =====================================
+# 로깅
+# =====================================
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    io.github.resilience4j: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# =====================================
+# Actuator
+# =====================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway,metrics,circuitbreakers
+  endpoint:
+    gateway:
+      enabled: true
+    health:
+      show-details: always

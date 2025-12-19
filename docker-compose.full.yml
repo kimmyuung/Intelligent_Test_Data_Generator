@@ -1,0 +1,164 @@
+version: '3.8'
+
+services:
+  # =====================================
+  # 데이터베이스
+  # =====================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: itdg-postgres
+    environment:
+      POSTGRES_DB: itdg
+      POSTGRES_USER: itdg
+      POSTGRES_PASSWORD: itdg123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - itdg-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U itdg" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: itdg-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - itdg-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # =====================================
+  # Java 백엔드 서비스
+  # =====================================
+  orchestrator:
+    build:
+      context: .
+      dockerfile: itdg-infra/docker/orchestrator.Dockerfile
+    container_name: itdg-orchestrator
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/itdg
+      SPRING_DATASOURCE_USERNAME: itdg
+      SPRING_DATASOURCE_PASSWORD: itdg123
+      SPRING_REDIS_HOST: redis
+      ANALYZER_URL: http://analyzer:8081
+      GENERATOR_URL: http://generator:8082
+      ML_SERVER_URL: http://ml-server:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      analyzer:
+        condition: service_started
+      generator:
+        condition: service_started
+    networks:
+      - itdg-network
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://localhost:8080/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  analyzer:
+    build:
+      context: .
+      dockerfile: itdg-infra/docker/analyzer.Dockerfile
+    container_name: itdg-analyzer
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/itdg
+      SPRING_DATASOURCE_USERNAME: itdg
+      SPRING_DATASOURCE_PASSWORD: itdg123
+    volumes:
+      - analyzer-temp:/app/temp_repo
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - itdg-network
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://localhost:8081/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  generator:
+    build:
+      context: .
+      dockerfile: itdg-infra/docker/generator.Dockerfile
+    container_name: itdg-generator
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - itdg-network
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://localhost:8082/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # =====================================
+  # ML 서버 (Python)
+  # =====================================
+  ml-server:
+    build:
+      context: .
+      dockerfile: itdg-infra/docker/ml-server.Dockerfile
+    container_name: itdg-ml-server
+    ports:
+      - "8000:8000"
+    environment:
+      MODELS_DIR: /app/models
+      MODEL_TTL: "3600"
+      CLEANUP_INTERVAL: "300"
+    volumes:
+      - ml-models:/app/models
+    networks:
+      - itdg-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # =====================================
+  # 프론트엔드
+  # =====================================
+  frontend:
+    build:
+      context: ./itdg-frontend
+      dockerfile: Dockerfile
+    container_name: itdg-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - orchestrator
+    networks:
+      - itdg-network
+
+volumes:
+  postgres-data:
+  analyzer-temp:
+  ml-models:
+
+
+networks:
+  itdg-network:
+    driver: bridge

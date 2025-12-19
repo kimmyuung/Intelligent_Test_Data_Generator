@@ -1,0 +1,397 @@
+/* ===================================
+   Multi-Table Learning Modal Styles
+   =================================== */
+
+.multi-table-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.multi-table-modal {
+    background: linear-gradient(145deg, #1e1e2e, #2a2a3e);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Modal Header */
+.multi-table-modal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(100, 108, 255, 0.1);
+}
+
+.multi-table-modal .modal-header h2 {
+    margin: 0;
+    color: #fff;
+    font-size: 1.3rem;
+}
+
+.multi-table-modal .close-btn {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 28px;
+    cursor: pointer;
+    transition: color 0.2s;
+    line-height: 1;
+}
+
+.multi-table-modal .close-btn:hover {
+    color: #ff6b6b;
+}
+
+/* Progress Indicator */
+.progress-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    gap: 10px;
+}
+
+.progress-indicator .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.progress-indicator .step-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #3a3a4a;
+    color: #888;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.progress-indicator .step.active .step-number {
+    background: linear-gradient(135deg, #646cff, #9747ff);
+    color: white;
+    box-shadow: 0 0 20px rgba(100, 108, 255, 0.4);
+}
+
+.progress-indicator .step-label {
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.progress-indicator .step.active .step-label {
+    color: #646cff;
+}
+
+.progress-indicator .step-line {
+    width: 60px;
+    height: 2px;
+    background: #3a3a4a;
+}
+
+/* Error Message */
+.error-message {
+    background: rgba(255, 82, 82, 0.15);
+    border: 1px solid rgba(255, 82, 82, 0.3);
+    color: #ff6b6b;
+    padding: 12px 16px;
+    margin: 0 20px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+/* Step Content */
+.step-content {
+    padding: 24px;
+}
+
+.step-content h3 {
+    margin: 0 0 8px 0;
+    color: #fff;
+    font-size: 1.1rem;
+}
+
+.step-description {
+    color: #888;
+    margin: 0 0 20px 0;
+    font-size: 0.9rem;
+}
+
+/* Table Upload List */
+.table-upload-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.table-upload-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 14px 18px;
+    transition: all 0.2s;
+}
+
+.table-upload-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(100, 108, 255, 0.3);
+}
+
+.table-name {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+    font-weight: 500;
+}
+
+.table-icon {
+    font-size: 1.2rem;
+}
+
+.upload-success {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #4caf50;
+}
+
+.upload-success .file-info {
+    font-size: 0.85rem;
+}
+
+.upload-success .file-info small {
+    color: #888;
+    margin-left: 6px;
+}
+
+.upload-btn {
+    background: linear-gradient(135deg, #646cff, #7c5dff);
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.upload-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(100, 108, 255, 0.4);
+}
+
+/* Relationships */
+.relationships-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.relationship-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 16px;
+    position: relative;
+}
+
+.rel-row {
+    display: flex;
+    gap: 16px;
+}
+
+.rel-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.rel-field label {
+    font-size: 0.75rem;
+    color: #888;
+    text-transform: uppercase;
+}
+
+.rel-field select {
+    background: #2a2a3e;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.rel-field select:focus {
+    outline: none;
+    border-color: #646cff;
+}
+
+.rel-arrow {
+    text-align: center;
+    color: #646cff;
+    font-size: 0.85rem;
+    padding: 10px 0;
+}
+
+.remove-rel-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.remove-rel-btn:hover {
+    opacity: 1;
+}
+
+.add-rel-btn {
+    background: rgba(100, 108, 255, 0.15);
+    border: 1px dashed rgba(100, 108, 255, 0.5);
+    color: #646cff;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.add-rel-btn:hover {
+    background: rgba(100, 108, 255, 0.25);
+    border-color: #646cff;
+}
+
+/* Step Actions */
+.step-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.secondary-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ccc;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.secondary-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.primary-btn {
+    background: linear-gradient(135deg, #646cff, #9747ff);
+    border: none;
+    color: white;
+    padding: 10px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.primary-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(100, 108, 255, 0.4);
+}
+
+.primary-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Complete Step */
+.complete-step {
+    text-align: center;
+}
+
+.success-icon-large {
+    font-size: 4rem;
+    margin-bottom: 16px;
+}
+
+.result-summary {
+    background: rgba(76, 175, 80, 0.1);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+    text-align: left;
+}
+
+.result-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.result-item:last-child {
+    border-bottom: none;
+}
+
+.result-item .label {
+    color: #888;
+}
+
+.result-item .value {
+    color: #fff;
+    font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .multi-table-modal {
+        width: 95%;
+        max-height: 90vh;
+    }
+
+    .rel-row {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .step-actions {
+        flex-direction: column;
+    }
+
+    .step-actions button {
+        width: 100%;
+    }
+}

@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: itdg-config
+  namespace: itdg
+  labels:
+    app.kubernetes.io/name: itdg
+data:
+  # Spring 프로파일
+  SPRING_PROFILES_ACTIVE: "kubernetes"
+  
+  # 서비스 URL (K8s 내부 DNS)
+  ANALYZER_URL: "http://analyzer-service:8081"
+  GENERATOR_URL: "http://generator-service:8082"
+  ML_SERVER_URL: "http://ml-server-service:8000"
+  
+  # 데이터베이스
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-service:5432/itdg"
+  SPRING_DATASOURCE_USERNAME: "itdg"
+  
+  # Redis
+  SPRING_REDIS_HOST: "redis-service"
+  SPRING_REDIS_PORT: "6379"
+  
+  # ML Server
+  MODELS_DIR: "/app/models"
+  MODEL_TTL: "3600"
+  CLEANUP_INTERVAL: "300"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: itdg-secrets
+  namespace: itdg
+type: Opaque
+stringData:
+  # 데이터베이스 비밀번호 (Base64 인코딩됨)
+  SPRING_DATASOURCE_PASSWORD: "itdg123"
+  POSTGRES_PASSWORD: "itdg123"
