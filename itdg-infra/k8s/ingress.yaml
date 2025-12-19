@@ -1,0 +1,74 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: itdg-ingress
+  namespace: itdg
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: itdg.local
+      http:
+        paths:
+          # Orchestrator API
+          - path: /api/orchestrator
+            pathType: Prefix
+            backend:
+              service:
+                name: orchestrator-service
+                port:
+                  number: 8080
+          
+          # ML API (via Orchestrator proxy)
+          - path: /api/ml
+            pathType: Prefix
+            backend:
+              service:
+                name: orchestrator-service
+                port:
+                  number: 8080
+          
+          # Health endpoints
+          - path: /api/health
+            pathType: Prefix
+            backend:
+              service:
+                name: orchestrator-service
+                port:
+                  number: 8080
+          
+          # Test endpoints
+          - path: /api/test
+            pathType: Prefix
+            backend:
+              service:
+                name: orchestrator-service
+                port:
+                  number: 8080
+
+---
+# Frontend Ingress (별도 배포 시)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: itdg-frontend-ingress
+  namespace: itdg
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: itdg.local
+      http:
+        paths:
+          - path: /(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-service
+                port:
+                  number: 80

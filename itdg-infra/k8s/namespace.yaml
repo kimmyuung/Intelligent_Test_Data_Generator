@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: itdg
+  labels:
+    app.kubernetes.io/name: itdg
+    app.kubernetes.io/instance: itdg
+    app.kubernetes.io/version: "1.0.0"

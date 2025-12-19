@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ml-server
+  namespace: itdg
+  labels:
+    app: ml-server
+    tier: backend
+spec:
+  replicas: 1  # ML 서버는 모델 상태 유지를 위해 1개로 시작
+  selector:
+    matchLabels:
+      app: ml-server
+  template:
+    metadata:
+      labels:
+        app: ml-server
+        tier: backend
+    spec:
+      containers:
+        - name: ml-server
+          image: itdg/ml-server:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: itdg-config
+          volumeMounts:
+            - name: models-storage
+              mountPath: /app/models
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+      volumes:
+        - name: models-storage
+          persistentVolumeClaim:
+            claimName: ml-models-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ml-server-service
+  namespace: itdg
+spec:
+  selector:
+    app: ml-server
+  ports:
+    - port: 8000
+      targetPort: 8000
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ml-models-pvc
+  namespace: itdg
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
