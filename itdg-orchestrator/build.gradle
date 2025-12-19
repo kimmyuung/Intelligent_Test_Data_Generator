@@ -22,4 +22,10 @@ dependencies {
 
     // RestTemplate/WebClient
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    // AOP (로깅)
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+    // Test dependencies
+    testImplementation 'io.projectreactor:reactor-test'
 }
