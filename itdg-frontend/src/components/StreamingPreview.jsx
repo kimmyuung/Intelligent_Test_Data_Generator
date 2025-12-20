@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { streamGenerate, downloadData } from '../api/streamingApi';
+import { streamGenerate, streamGenerateMl, downloadData } from '../api/streamingApi';
 import './StreamingPreview.css';
 
 /**
@@ -9,8 +9,9 @@ import './StreamingPreview.css';
  * - 실시간 진행률 표시
  * - 생성 즉시 미리보기 테이블 업데이트
  * - CSV/XLSX/JSON 다운로드 포맷 선택
+ * - ML 학습 데이터 기반 생성 지원
  */
-const StreamingPreview = ({ tableName, schema, defaultRowCount = 1000 }) => {
+const StreamingPreview = ({ tableName, schema, defaultRowCount = 1000, mlModelId }) => {
     const [data, setData] = useState([]);
     const [progress, setProgress] = useState(0);
     const [total, setTotal] = useState(0);
@@ -22,6 +23,7 @@ const StreamingPreview = ({ tableName, schema, defaultRowCount = 1000 }) => {
     const [rowCount, setRowCount] = useState(defaultRowCount);
     const [downloadFormat, setDownloadFormat] = useState('csv');
     const [cleanupFn, setCleanupFn] = useState(null);
+    const [useMlGeneration, setUseMlGeneration] = useState(!!mlModelId);  // ML 모델이 있으면 기본 사용
 
     const handleStartGenerate = useCallback(async () => {
         setIsLoading(true);
@@ -37,9 +39,13 @@ const StreamingPreview = ({ tableName, schema, defaultRowCount = 1000 }) => {
             schema,
             rowCount,
             seed: Date.now(),
+            mlModelId: useMlGeneration ? mlModelId : null,  // ML 모델 ID 추가
         };
 
-        const cleanup = await streamGenerate(
+        // ML 모델 사용 여부에 따라 다른 API 호출
+        const streamFn = useMlGeneration && mlModelId ? streamGenerateMl : streamGenerate;
+
+        const cleanup = await streamFn(
             request,
             // onProgress
             (current, total, percent) => {
@@ -69,7 +75,7 @@ const StreamingPreview = ({ tableName, schema, defaultRowCount = 1000 }) => {
         );
 
         setCleanupFn(() => cleanup);
-    }, [tableName, schema, rowCount]);
+    }, [tableName, schema, rowCount, useMlGeneration, mlModelId]);
 
     const handleStop = useCallback(() => {
         if (cleanupFn) {
@@ -79,6 +85,11 @@ const StreamingPreview = ({ tableName, schema, defaultRowCount = 1000 }) => {
     }, [cleanupFn]);
 
     const handleDownload = useCallback(async () => {
+        if (total === 0) {
+            alert('생성된 데이터가 없어 다운로드할 수 없습니다.');
+            return;
+        }
+
         setIsDownloading(true);
         setError(null);
 
@@ -94,7 +105,7 @@ const StreamingPreview = ({ tableName, schema, defaultRowCount = 1000 }) => {
         } finally {
             setIsDownloading(false);
         }
-    }, [tableName, schema, rowCount, downloadFormat]);
+    }, [tableName, schema, rowCount, downloadFormat, total]);
 
     const columns = data.length > 0 ? Object.keys(data[0]) :
         schema?.columns?.map(c => c.name) || [];

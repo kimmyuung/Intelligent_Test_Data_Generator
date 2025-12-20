@@ -1,0 +1,45 @@
+# 테스트 환경 프로파일
+spring:
+  application:
+    name: itdg-orchestrator-test
+  profiles:
+    active: test
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+server:
+  port: 0  # 랜덤 포트
+
+# 서비스 URL (테스트 시 모킹 또는 실제 서비스)
+analyzer:
+  service:
+    url: http://localhost:8082
+
+generator:
+  service:
+    url: http://localhost:8083
+
+mlserver:
+  service:
+    url: http://localhost:8000
+
+# 로깅 최소화
+logging:
+  level:
+    root: WARN
+    com.itdg: INFO
+    org.springframework.web: WARN
+    org.hibernate: WARN

@@ -1,4 +1,4 @@
-package kmh.dev.itdg.client;
+package com.itdg.orchestrator.client;
 
 public class DateTimeUtil {
 }

@@ -58,8 +58,10 @@ public class JPAProjectParser implements ProjectParser {
     @Override
     public List<TableMetadata> parse(File projectDir) {
         List<TableMetadata> tables = new ArrayList<>();
-        // SymbolResolver 제거: AST 파싱만으로 충분함
-        JavaParser javaParser = new JavaParser();
+        // Parser Configuration: Java 17 Support
+        ParserConfiguration config = new ParserConfiguration();
+        config.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17);
+        JavaParser javaParser = new JavaParser(config);
 
         try (Stream<Path> walk = Files.walk(projectDir.toPath())) {
             List<File> javaFiles = walk
@@ -69,13 +71,18 @@ public class JPAProjectParser implements ProjectParser {
 
             for (File file : javaFiles) {
                 try {
-                    ParseResult<CompilationUnit> result = javaParser.parse(file);
+                    // Explicit UTF-8 Reading to avoid encoding issues on Windows
+                    String code = Files.readString(file.toPath(), java.nio.charset.StandardCharsets.UTF_8);
+                    ParseResult<CompilationUnit> result = javaParser.parse(code);
+
                     if (result.isSuccessful() && result.getResult().isPresent()) {
                         CompilationUnit cu = result.getResult().get();
                         extractEntities(cu, tables);
+                    } else {
+                        log.warn("Parse failure in {}: {}", file.getName(), result.getProblems());
                     }
-                } catch (IOException e) {
-                    log.warn("Failed to parse java file: {}", file.getName());
+                } catch (Exception e) {
+                    log.warn("Failed to parse java file: {} - {}", file.getName(), e.getMessage());
                 }
             }
         } catch (IOException e) {

@@ -137,4 +137,20 @@ public class ServiceCommunicationService {
                     return result;
                 });
     }
+
+    /**
+     * ML Server에서 합성 데이터 생성
+     */
+    public Mono<MlServerDto.GenerateResponse> generateMlSyntheticData(String modelId, int numRows) {
+        log.info("Calling ML Server generate synthetic data - modelId: {}, numRows: {}", modelId, numRows);
+        return mlServerWebClient.post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/v1/generate/{modelId}")
+                        .queryParam("num_rows", numRows)
+                        .build(modelId))
+                .retrieve()
+                .bodyToMono(MlServerDto.GenerateResponse.class)
+                .doOnSuccess(response -> log.info("ML synthetic data generated: {} rows", response.getRowCount()))
+                .doOnError(error -> log.error("ML synthetic data generation failed", error));
+    }
 }

@@ -1,4 +1,4 @@
-description = 'ITDG Generator Service - 데이터 생성 및 배치 처리'
+description = 'ITDG Generator Service - 데이터 생성 서비스'
 
 dependencies {
     // 공통 모듈
@@ -6,8 +6,14 @@ dependencies {
 
     // Spring Boot
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-batch'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // NOTE: Spring Batch 6.0 (Boot 4.0) 호환성 문제로 임시 비활성화
+    // 추후 Spring Batch 6.0 안정화 후 재활성화 예정
+    // implementation 'org.springframework.boot:spring-boot-starter-batch'
+    // implementation 'org.springframework.batch:spring-batch-core'
+    // implementation 'org.springframework.batch:spring-batch-infrastructure'
+    // testImplementation 'org.springframework.batch:spring-batch-test'
 
     // Database
     runtimeOnly 'org.postgresql:postgresql'
@@ -20,11 +26,16 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind'
 
     // Excel (XLSX) 파일 처리
+    implementation 'org.apache.poi:poi:5.2.5'
     implementation 'org.apache.poi:poi-ooxml:5.2.5'
 
     // Actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
-    // Batch Test
-    testImplementation 'org.springframework.batch:spring-batch-test'
+    // SpringDoc OpenAPI (Swagger UI)
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8'
+
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

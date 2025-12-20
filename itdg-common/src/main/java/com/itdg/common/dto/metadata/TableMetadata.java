@@ -4,12 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@Setter
 @Builder
 @ToString
 @NoArgsConstructor
@@ -25,4 +27,8 @@ public class TableMetadata {
 
     private Long rowCount;
     private String comment;
+
+    // ML 통합 필드
+    private String mlModelId; // 학습된 ML 모델 ID (SDV)
+    private Integer targetRowCount; // 생성할 행 수 (프론트엔드에서 지정)
 }

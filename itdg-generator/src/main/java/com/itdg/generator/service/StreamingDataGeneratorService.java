@@ -46,6 +46,9 @@ public class StreamingDataGeneratorService {
         UniqueValueTracker uniqueTracker = new UniqueValueTracker();
         AtomicLong pkSequence = new AtomicLong(1);
 
+        // 컬럼이 하나도 없으면 루프가 안 돌아서 빈 Row가 생성되지만,
+        // 굳이 기본값을 강제 주입하지 않고 그대로 둠 (사용자 요청: 학습 결과에 맡김)
+
         return IntStream.range(0, rowCount)
                 .mapToObj(i -> generateRow(table, random, uniqueTracker, pkSequence));
     }
@@ -76,7 +79,7 @@ public class StreamingDataGeneratorService {
         for (ColumnMetadata column : table.getColumns()) {
             Object value = null;
             boolean valid = false;
-            int maxRetries = 5;
+            int maxRetries = 10; // Retry 횟수
 
             // 1. Primary Key 처리
             if (Boolean.TRUE.equals(column.getIsPrimaryKey())) {
@@ -96,7 +99,12 @@ public class StreamingDataGeneratorService {
                     // Unique 체크
                     if (Boolean.TRUE.equals(column.getIsUnique())) {
                         if (!uniqueTracker.isUnique(column.getName(), value)) {
-                            continue;
+                            // 마지막 시도면 강제 유니크 값 생성
+                            if (retry == maxRetries - 1) {
+                                value = forceUniqueValue(column, value);
+                            } else {
+                                continue;
+                            }
                         }
                     }
 
@@ -109,9 +117,22 @@ public class StreamingDataGeneratorService {
                 }
             }
 
-            // Fallback
-            if (!valid && !Boolean.TRUE.equals(column.getIsNullable())) {
-                value = getDefaultValue(column);
+            // Fallback: 여전히 유효하지 않다면 기본값 사용
+            if (!valid) {
+                if (Boolean.TRUE.equals(column.getIsNullable())) {
+                    value = null; // Nullable이면 null 허용
+                } else {
+                    value = getDefaultValue(column);
+                    // 기본값도 Unique여야 한다면 강제 변환
+                    if (Boolean.TRUE.equals(column.getIsUnique())) {
+                        value = forceUniqueValue(column, value);
+                    }
+                }
+            }
+
+            // 최종 값 Unique 등록 (필수)
+            if (Boolean.TRUE.equals(column.getIsUnique()) && value != null) {
+                uniqueTracker.add(column.getName(), value);
             }
 
             row.put(column.getName(), value);
@@ -121,12 +142,28 @@ public class StreamingDataGeneratorService {
     }
 
     /**
+     * 강제로 유니크한 값 생성 (충돌 회피)
+     */
+    private Object forceUniqueValue(ColumnMetadata column, Object originalValue) {
+        String type = column.getDataType().toUpperCase();
+        String suffix = "_" + UUID.randomUUID().toString().substring(0, 5);
+
+        if (type.contains("CHAR") || type.contains("TEXT") || type.contains("STRING")) {
+            return String.valueOf(originalValue) + suffix;
+        }
+        if (type.contains("INT") || type.contains("LONG")) {
+            return System.nanoTime() % 1000000; // 임시: 시간 기반 난수
+        }
+        return originalValue; // 다른 타입은 포기
+    }
+
+    /**
      * Primary Key 생성
      */
     private Object generatePrimaryKey(ColumnMetadata column, AtomicLong pkSequence) {
         String type = column.getDataType().toUpperCase();
         if (Boolean.TRUE.equals(column.getIsAutoIncrement()) ||
-                type.contains("INT") || type.contains("SERIAL")) {
+                type.contains("INT") || type.contains("SERIAL") || type.contains("LONG")) {
             return pkSequence.getAndIncrement();
         }
         return UUID.randomUUID().toString();
