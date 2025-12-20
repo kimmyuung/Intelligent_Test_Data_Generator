@@ -1,0 +1,15 @@
+# 테스트 환경 프로파일
+spring:
+  application:
+    name: itdg-generator-test
+  profiles:
+    active: test
+
+server:
+  port: 0
+
+# 로깅 최소화
+logging:
+  level:
+    root: WARN
+    com.itdg: INFO

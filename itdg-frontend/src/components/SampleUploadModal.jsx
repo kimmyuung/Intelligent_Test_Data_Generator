@@ -2,7 +2,8 @@ import React, { useState, useMemo } from 'react';
 import axios from 'axios';
 import './SampleUploadModal.css';
 
-const ML_SERVER_URL = 'http://localhost:8000';
+// Orchestrator 프록시를 통해 ML Server에 접근 (CORS 해결 + 아키텍처 일관성)
+const ORCHESTRATOR_URL = 'http://localhost:8080';
 
 const SampleUploadModal = ({ tableName, onClose, onAnalyzeComplete }) => {
     const [file, setFile] = useState(null);
@@ -47,7 +48,7 @@ const SampleUploadModal = ({ tableName, onClose, onAnalyzeComplete }) => {
         formData.append('file', file);
 
         try {
-            const response = await axios.post(`${ML_SERVER_URL}/api/v1/analyze`, formData, {
+            const response = await axios.post(`${ORCHESTRATOR_URL}/api/ml/analyze`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 
@@ -74,8 +75,8 @@ const SampleUploadModal = ({ tableName, onClose, onAnalyzeComplete }) => {
         setStep('training');
 
         try {
-            // 1. 모델 학습
-            const trainResponse = await axios.post(`${ML_SERVER_URL}/api/v1/train`, null, {
+            // 1. 모델 학습 (Orchestrator 프록시 경유)
+            const trainResponse = await axios.post(`${ORCHESTRATOR_URL}/api/ml/train`, null, {
                 params: { file_id: analysisResult.fileId, model_type: modelType }
             });
 
@@ -85,9 +86,9 @@ const SampleUploadModal = ({ tableName, onClose, onAnalyzeComplete }) => {
 
             setTrainResult(trainResponse.data);
 
-            // 2. 100개 미리보기 데이터 생성
+            // 2. 100개 미리보기 데이터 생성 (Orchestrator 프록시 경유)
             const previewResponse = await axios.post(
-                `${ML_SERVER_URL}/api/v1/generate/${trainResponse.data.modelId}`,
+                `${ORCHESTRATOR_URL}/api/ml/generate/${trainResponse.data.modelId}`,
                 null,
                 { params: { num_rows: 100 } }
             );
@@ -113,7 +114,7 @@ const SampleUploadModal = ({ tableName, onClose, onAnalyzeComplete }) => {
         // 기존 모델 삭제
         if (trainResult?.modelId) {
             try {
-                await axios.delete(`${ML_SERVER_URL}/api/v1/model/${trainResult.modelId}`);
+                await axios.delete(`${ORCHESTRATOR_URL}/api/ml/model/${trainResult.modelId}`);
             } catch (err) {
                 console.warn("Model deletion failed:", err);
             }

@@ -16,7 +16,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
 server:
-  port: 8081
+  port: 8080
   servlet:
     session:
       timeout: 30m
@@ -27,6 +27,19 @@ logging:
   level:
     com.itdg: DEBUG
     org.springframework.web: INFO
+
+# Actuator 엔드포인트 설정
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: ${spring.application.name}
 
 ---
 spring:
@@ -41,8 +54,12 @@ spring:
 
 analyzer:
   service:
-    url: http://localhost:8082
+    url: http://localhost:8081
 
 generator:
   service:
-    url: http://localhost:8083
+    url: http://localhost:8082
+
+mlserver:
+  service:
+    url: http://localhost:8000

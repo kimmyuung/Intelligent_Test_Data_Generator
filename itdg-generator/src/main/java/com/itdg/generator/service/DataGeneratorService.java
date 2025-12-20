@@ -18,6 +18,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -26,34 +29,32 @@ public class DataGeneratorService {
 
     private final List<DataGeneratorStrategy> strategies;
 
+    /**
+     * 전체 데이터 생성 (동기식, 인메모리 수집)
+     * 소규모 데이터 생성에 적합
+     */
     public GenerateDataResponse generateData(GenerateDataRequest request) {
         log.info("Starting data generation for request with seed: {}", request.getSeed());
 
         long seed = request.getSeed() != null ? request.getSeed() : System.currentTimeMillis();
-        Random random = new Random(seed);
-
         Map<String, List<Map<String, Object>>> successData = new HashMap<>();
         Map<String, Integer> statistics = new HashMap<>();
 
         // request.getSchema() null check
         if (request.getSchema() == null || request.getSchema().getTables() == null) {
-            throw new IllegalArgumentException("Schema information is missing");
+            return GenerateDataResponse.builder()
+                    .success(false)
+                    .message("Schema or tables cannot be null")
+                    .build();
         }
 
         for (TableMetadata table : request.getSchema().getTables()) {
             log.info("Generating data for table: {}", table.getTableName());
-            UniqueValueTracker uniqueTracker = new UniqueValueTracker();
-            AtomicLong pkSequence = new AtomicLong(1); // Simple sequence for PKs
+            int rowCount = request.getRowCount() != null ? request.getRowCount() : 100;
 
-            int rowCount = request.getRowCount() != null ? request.getRowCount() : 10;
-            List<Map<String, Object>> rows = new ArrayList<>();
-
-            for (int i = 0; i < rowCount; i++) {
-                Map<String, Object> row = generateRow(table, random, uniqueTracker, pkSequence);
-                if (row != null) {
-                    rows.add(row);
-                }
-            }
+            // 스트림을 리스트로 수집
+            List<Map<String, Object>> rows = generateDataStream(table, rowCount, seed)
+                    .collect(Collectors.toList());
 
             successData.put(table.getTableName(), rows);
             statistics.put(table.getTableName(), rows.size());
@@ -67,6 +68,21 @@ public class DataGeneratorService {
                 .success(true)
                 .message("Successfully generated data for " + successData.size() + " tables")
                 .build();
+    }
+
+    /**
+     * 대용량 처리를 위한 Stream 기반 데이터 생성
+     * 메모리 효율적 (O(1))
+     */
+    public Stream<Map<String, Object>> generateDataStream(
+            TableMetadata table, int rowCount, long seed) {
+
+        Random random = new Random(seed);
+        UniqueValueTracker uniqueTracker = new UniqueValueTracker();
+        AtomicLong pkSequence = new AtomicLong(1);
+
+        return IntStream.range(0, rowCount)
+                .mapToObj(i -> generateRow(table, random, uniqueTracker, pkSequence));
     }
 
     private Map<String, Object> generateRow(TableMetadata table, Random random, UniqueValueTracker uniqueTracker,
