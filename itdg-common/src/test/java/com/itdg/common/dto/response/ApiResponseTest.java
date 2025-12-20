@@ -1,6 +1,5 @@
-package dto.response;
+package com.itdg.common.dto.response;
 
-import com.itdg.common.dto.response.ApiResponse;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

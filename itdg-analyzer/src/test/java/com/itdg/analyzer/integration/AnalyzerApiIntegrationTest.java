@@ -2,10 +2,12 @@ package com.itdg.analyzer.integration;
 
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Map;
@@ -19,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayName("Analyzer API 통합 테스트")
+@AutoConfigureTestRestTemplate
 class AnalyzerApiIntegrationTest {
 
     @LocalServerPort

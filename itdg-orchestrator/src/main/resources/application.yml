@@ -28,6 +28,20 @@ logging:
     com.itdg: DEBUG
     org.springframework.web: INFO
 
+# SpringDoc OpenAPI (Swagger UI) 설정
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+  show-actuator: false
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+
 # Actuator 엔드포인트 설정
 management:
   endpoints:
