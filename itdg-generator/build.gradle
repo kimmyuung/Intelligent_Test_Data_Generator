@@ -38,4 +38,9 @@ dependencies {
 
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-test-autoconfigure'
+    testImplementation 'org.springframework.boot:spring-boot-starter-webclient-test'
+    testImplementation 'org.springframework:spring-test'
+    testImplementation 'org.springframework:spring-webmvc'
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 }

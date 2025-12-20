@@ -79,6 +79,7 @@ subprojects {
 
         // 테스트 공통 의존성
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testImplementation 'org.springframework.boot:spring-boot-test'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
         testCompileOnly 'org.projectlombok:lombok'
         testAnnotationProcessor 'org.projectlombok:lombok'

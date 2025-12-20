@@ -37,6 +37,7 @@ class ServiceCommunicationIntegrationTest {
         @DisplayName("Analyzer 헬스체크 - 서버 실행 여부와 무관하게 완료")
         void checkAnalyzerHealth_ShouldCompleteWithOrWithoutServer() {
                 Mono<?> result = communicationService.checkAnalyzerHealth()
+                                .cast(Object.class) // 타입을 Object로 캐스팅
                                 .onErrorResume(e -> Mono.just("DOWN"));
 
                 StepVerifier.create(result)
@@ -50,6 +51,7 @@ class ServiceCommunicationIntegrationTest {
         @DisplayName("Generator 헬스체크 - 서버 실행 여부와 무관하게 완료")
         void checkGeneratorHealth_ShouldCompleteWithOrWithoutServer() {
                 Mono<?> result = communicationService.checkGeneratorHealth()
+                                .cast(Object.class) // 타입을 Object로 캐스팅
                                 .onErrorResume(e -> Mono.just("DOWN"));
 
                 StepVerifier.create(result)
@@ -63,6 +65,7 @@ class ServiceCommunicationIntegrationTest {
         @DisplayName("ML Server 헬스체크 - 서버 실행 여부와 무관하게 완료")
         void checkMlServerHealth_ShouldCompleteWithOrWithoutServer() {
                 Mono<?> result = communicationService.checkMlServerHealth()
+                                .cast(Object.class) // 타입을 Object로 캐스팅
                                 .onErrorResume(e -> Mono.just("DOWN"));
 
                 StepVerifier.create(result)
